@@ -1,25 +1,20 @@
-import type { Component } from 'solid-js';
+import { Component, createSignal } from 'solid-js';
 
-import logo from './logo.svg';
 import styles from './App.module.css';
 
+
 const App: Component = () => {
+
+  const [cores, setCores] = createSignal(1);
+  const [memory, setMemory] = createSignal(256);
+
   return (
-    <div class={styles.App}>
-      <header class={styles.header}>
-        <img src={logo} class={styles.logo} alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          class={styles.link}
-          href="https://github.com/solidjs/solid"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn Solid
-        </a>
-      </header>
+    <div>
+      <label for="cores">Number of Cores: {cores()}</label>
+      <input type="number" value={cores()} name="cores" onChange={(e) => setCores(parseInt(e.target.value, 10))} />
+      <label for="memory">Memory: {memory()}</label>
+      <input type="number" value={memory()} name="memory" onChange={(e) => setMemory(parseInt(e.target.value || "", 10))} />
+
     </div>
   );
 };
