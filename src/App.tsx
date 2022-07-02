@@ -1,4 +1,4 @@
-import { Accessor, Component, For } from 'solid-js';
+import { Accessor, Component, createEffect, For } from 'solid-js';
 import { createStore, produce } from 'solid-js/store';
 
 import styles from './App.module.css';
@@ -24,6 +24,16 @@ interface Cart {
 
 const [cart, setCart] = createStore<Cart>({
   items: []
+})
+
+try {
+  setCart(JSON.parse(atob(window.location.hash.slice(1))))
+} catch (e) {
+  // either invalid or nonexistent data in URL fragment, no cart to load
+}
+
+createEffect(() => {
+  window.location.hash = btoa(JSON.stringify(cart))
 })
 
 const addCartItem = () => {
