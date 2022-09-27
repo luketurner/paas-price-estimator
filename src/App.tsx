@@ -4,6 +4,7 @@ import { createStore, produce } from 'solid-js/store';
 import styles from './App.module.css';
 import { AppDBProvider, createAppDb, ServiceRequest, useDb } from './db';
 import { providers } from './pricing';
+import { FlyServiceRequestLine } from './providers/fly';
 
 // const providers = [
 //   { name: 'fly.io', cpuCost: 1, memoryCost: 1, storageCost: 1, bytesInCost: 1, bytesOutCost: 1 },
@@ -182,11 +183,7 @@ const PriceComparisonList = () => {
       <ol>
         <For each={db.requestedServices}>
           {(req, ix) => {
-            return (
-              <li>
-                TODO
-              </li>
-            )
+            return <FlyServiceRequestLine {...req} />
           }}
         </For>
       </ol>
