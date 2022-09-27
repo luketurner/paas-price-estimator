@@ -1,6 +1,6 @@
 {
-  "name": "vite-template-solid",
-  "version": "0.0.0",
+  "name": "compare-paas-prices",
+  "version": "0.0.1-SNAPSHOT",
   "description": "",
   "scripts": {
     "start": "vite",
@@ -8,6 +8,7 @@
     "build": "vite build",
     "serve": "vite preview"
   },
+  "author": "Luke Turner",
   "license": "MIT",
   "devDependencies": {
     "autoprefixer": "^10.4.7",

@@ -1,4 +1,4 @@
-# cloud-compare
+# Compare PaaS Prices
 
 A little app for comparing pricing/features in various "Containerized PaaS" products.
 
@@ -25,7 +25,7 @@ Mainly written as an experiment with some new front-end tools I wanted to try:
 > 
 > If you're looking to deploy something in the cloud, you should consider these options to decide which is most appropriate for your use case, even though they aren't supported by this app.
 
-So, what *will* `cloud-compare` support? I'm hoping to build pricing comparisons for the following containerized PaaS providers:
+So, what *will* the app support? I'm hoping to build pricing comparisons for the following containerized PaaS providers:
 
 - [fly.io](https://fly.io/) ([pricing](https://fly.io/docs/about/pricing/))
 - [Digital Ocean App Platform](https://www.digitalocean.com/products/app-platform) ([pricing](https://www.digitalocean.com/pricing/app-platform))
