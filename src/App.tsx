@@ -22,7 +22,7 @@ import { RenderServiceRequestLine } from './providers/render';
 
 const Select = (props: any) => {
   return (
-    <select onChange={(e) => props.onChange((e.target as any).value)}>
+    <select class="mx-2" onChange={(e) => props.onChange((e.target as any).value)}>
       <For each={props.options}>
         {(o) => <option value={o} selected={props.selected === o}>{o}</option>}
       </For>
@@ -36,7 +36,7 @@ const ServiceRequestEditor: Component<{
 }> = (props) => {
   const [db, setDb] = useDb();
   return (
-    <li>
+    <li class="py-2">
       A 
       <Select
         options={['container', 'database']}
@@ -45,7 +45,8 @@ const ServiceRequestEditor: Component<{
       />
       with
       <input
-        style={{width: '3em'}}
+        class="w-12 ml-2"
+        // style={{width: '3em'}}
         type="number"
         value={props.request.cpu}
         onChange={(e) => setDb('requestedServices', props.requestIndex, 'cpu', parseInt((e.target as any).value, 10))}
@@ -57,14 +58,14 @@ const ServiceRequestEditor: Component<{
       />
       CPU{props.request.cpu === 1 ? '' : 's'} and
       <input
-        style={{width: '6em'}}
+        class="w-20 mx-2"
         type="number"
         value={props.request.memory}
         step="256"
         onChange={(e) => setDb('requestedServices', props.requestIndex, 'memory', parseInt((e.target as any).value, 10))}
       />mb memory.
       <button onClick={() => setDb('requestedServices', produce((v) => v.splice(props.requestIndex, 1)))}>(X)</button>
-      <ol>
+      <ol class="ml-4">
         <For each={props.request.addons}>
           {(addon, ix) => {
             return (
@@ -163,9 +164,9 @@ const ServiceRequestList = () => {
   const [db] = useDb();
 
   return (
-    <div>
+    <div class="my-4">
       <p>I want to compare...</p>
-      <ol>
+      <ol class="list-decimal ml-6">
         <For each={db.requestedServices}>
           {(req, ix) => <ServiceRequestEditor request={req} requestIndex={ix()}/>}
         </For>
@@ -181,7 +182,7 @@ const PriceComparisonList = () => {
   return (
     <div>
       <p>Fly.io</p>
-      <ol>
+      <ol class="list-decimal ml-6">
         <For each={db.requestedServices}>
           {(req, ix) => {
             return <FlyServiceRequestLine {...req} />
@@ -189,7 +190,7 @@ const PriceComparisonList = () => {
         </For>
       </ol>
       <p>Render</p>
-      <ol>
+      <ol class="list-decimal ml-6">
         <For each={db.requestedServices}>
           {(req, ix) => {
             return <RenderServiceRequestLine {...req} />
@@ -203,10 +204,11 @@ const PriceComparisonList = () => {
 const App: Component = () => {
   return (
     <AppDBProvider>
-      <h1>Compare PaaS Prices</h1>
-      <ServiceRequestList />
-      <p>Price comparison:</p>
-      <PriceComparisonList />
+      <div class="container mx-auto px-4">
+        <h1 class="text-2xl m-4 text-center">Compare PaaS Prices</h1>
+        <ServiceRequestList />
+        <PriceComparisonList />
+      </div>
     </AppDBProvider>
   );
 };

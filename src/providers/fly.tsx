@@ -42,7 +42,7 @@ export const FlyServiceRequestLine: Component<FlyServiceRequestLineProps> = (pro
   const tier = createMemo(() => {
     return pricingTable.tiers.find(tier => (
       tier.cpu >= props.cpu &&
-      props.cpuType === 'shared' ? true : tier.cpuType === 'dedicated' &&
+      (props.cpuType === 'shared' ? true : tier.cpuType === 'dedicated') &&
       tier.memory >= props.memory
     ));
   });
@@ -53,7 +53,7 @@ export const FlyServiceRequestLine: Component<FlyServiceRequestLineProps> = (pro
         {tier()?.name} - ${tier()?.costPerSecond}/sec
       </Show>
       <Show when={props.addons}>
-        <ol>
+        <ol class="ml-4">
           <For each={props.addons}>
             {(addon, ix) => {
               return (

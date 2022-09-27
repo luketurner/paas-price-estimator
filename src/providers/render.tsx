@@ -41,7 +41,7 @@ export const RenderServiceRequestLine: Component<RenderServiceRequestLineProps> 
         {tier()?.name} ({tier().cpu} {tier().cpuType} cpu, {tier().memory} memory) - ${tier()?.costPerMonth}/month
       </Show>
       <Show when={props.addons}>
-        <ol>
+        <ol class="ml-6">
           <For each={props.addons}>
             {(addon, ix) => {
               return (
