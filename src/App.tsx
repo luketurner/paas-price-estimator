@@ -5,6 +5,7 @@ import styles from './App.module.css';
 import { AppDBProvider, createAppDb, ServiceRequest, useDb } from './db';
 import { providers } from './pricing';
 import { FlyServiceRequestLine } from './providers/fly';
+import { RenderServiceRequestLine } from './providers/render';
 
 // const providers = [
 //   { name: 'fly.io', cpuCost: 1, memoryCost: 1, storageCost: 1, bytesInCost: 1, bytesOutCost: 1 },
@@ -184,6 +185,14 @@ const PriceComparisonList = () => {
         <For each={db.requestedServices}>
           {(req, ix) => {
             return <FlyServiceRequestLine {...req} />
+          }}
+        </For>
+      </ol>
+      <p>Render</p>
+      <ol>
+        <For each={db.requestedServices}>
+          {(req, ix) => {
+            return <RenderServiceRequestLine {...req} />
           }}
         </For>
       </ol>
