@@ -1,5 +1,5 @@
 import { Component, createMemo, For, Match, Show, Switch } from "solid-js";
-import { ServiceRequest } from "../db";
+import { ServiceRequest, useDb } from "../db";
 
 export const pricingTable = {
   link: 'https://fly.io/docs/about/pricing/',
@@ -35,17 +35,49 @@ export const pricingTable = {
   staticIpPerMonth: 2 // first one free
 }
 
+const tierFor = (req: ServiceRequest) => {
+  return pricingTable.tiers.find(tier => (
+    tier.cpu >= req.cpu &&
+    (req.cpuType === 'shared' ? true : tier.cpuType === 'dedicated') &&
+    tier.memory >= req.memory
+  ));
+};
+
+const secondsPerMonth = 60 * 60 * 24 * 30;
+
 export interface FlyServiceRequestLineProps extends ServiceRequest {}
+
+export const FlyInlineCost: Component = () => {
+  const [db] = useDb();
+  const cost = createMemo(() => {
+    let cost = 0;
+
+    for (const req of db.requestedServices) {
+      const tier = tierFor(req);
+      if (!tier) return;
+      cost += tier.costPerSecond * secondsPerMonth;
+      for (const addon of req.addons) {
+        if (addon.type === 'network') {
+          cost += pricingTable.network.gbOut * (addon.egressPerSecond / 1024) * secondsPerMonth;
+        } else if (addon.type === 'ssd') {
+          cost += pricingTable.storage.gbCostPerMonth * (addon.size / 1024);
+        } else if (addon.type === 'static-ip-v4') {
+          cost += pricingTable.staticIpPerMonth;
+        } else {
+          return;
+        }
+      }
+    }
+
+    return cost;
+  });
+
+  return <>${cost() ? cost() : 'N/A'}</>
+}
 
 export const FlyServiceRequestLine: Component<FlyServiceRequestLineProps> = (props) => {
 
-  const tier = createMemo(() => {
-    return pricingTable.tiers.find(tier => (
-      tier.cpu >= props.cpu &&
-      (props.cpuType === 'shared' ? true : tier.cpuType === 'dedicated') &&
-      tier.memory >= props.memory
-    ));
-  });
+  const tier = createMemo(() => tierFor(props));
 
   return (
     <li>

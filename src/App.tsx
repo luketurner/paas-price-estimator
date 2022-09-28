@@ -4,8 +4,8 @@ import { createStore, produce } from 'solid-js/store';
 import styles from './App.module.css';
 import { AppDBProvider, createAppDb, ServiceRequest, useDb } from './db';
 import { providers } from './pricing';
-import { FlyServiceRequestLine } from './providers/fly';
-import { RenderServiceRequestLine } from './providers/render';
+import { FlyInlineCost, FlyServiceRequestLine } from './providers/fly';
+import { RenderInlineCost, RenderServiceRequestLine } from './providers/render';
 
 // const providers = [
 //   { name: 'fly.io', cpuCost: 1, memoryCost: 1, storageCost: 1, bytesInCost: 1, bytesOutCost: 1 },
@@ -144,7 +144,8 @@ const AddServiceRequest = () => {
         cpu: 1,
         cpuType: 'shared',
         serviceType: 'container',
-        memory: 256
+        memory: 256,
+        addons: []
       })}>+Container</button>
       <button onClick={() => addService({
         cpu: 1,
@@ -176,27 +177,52 @@ const ServiceRequestList = () => {
   )
 }
 
-const PriceComparisonList = () => {
+const CostSummary = () => {
   const [db] = useDb();
 
   return (
     <div>
-      <p>Fly.io</p>
-      <ol class="list-decimal ml-6">
-        <For each={db.requestedServices}>
-          {(req, ix) => {
-            return <FlyServiceRequestLine {...req} />
-          }}
-        </For>
-      </ol>
-      <p>Render</p>
-      <ol class="list-decimal ml-6">
-        <For each={db.requestedServices}>
-          {(req, ix) => {
-            return <RenderServiceRequestLine {...req} />
-          }}
-        </For>
-      </ol>
+      <div class="my-4">
+        <div class="inline-block align-top w-32">Fly.io</div>
+        <div class="list-decimal ml-6 inline-block">
+          <FlyInlineCost />
+        </div>
+      </div>
+      <div class="my-4">
+        <div class="inline-block align-top w-32">Render</div>
+        <div class="list-decimal ml-6 inline-block">
+          <RenderInlineCost />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const CostBreakdown = () => {
+  const [db] = useDb();
+
+  return (
+    <div>
+      <div class="my-4">
+        <div class="inline-block align-top w-32">Fly.io</div>
+        <ol class="list-decimal ml-6 inline-block">
+          <For each={db.requestedServices}>
+            {(req, ix) => {
+              return <FlyServiceRequestLine {...req} />
+            }}
+          </For>
+        </ol>
+      </div>
+      <div class="my-4">
+        <div class="inline-block align-top w-32">Render</div>
+        <ol class="list-decimal ml-6 inline-block">
+          <For each={db.requestedServices}>
+            {(req, ix) => {
+              return <RenderServiceRequestLine {...req} />
+            }}
+          </For>
+        </ol>
+      </div>
     </div>
   )
 }
@@ -207,7 +233,10 @@ const App: Component = () => {
       <div class="container mx-auto px-4">
         <h1 class="text-2xl m-4 text-center">Compare PaaS Prices</h1>
         <ServiceRequestList />
-        <PriceComparisonList />
+        <h1 class="text-xl m-4 text-center">Summary</h1>
+        <CostSummary />
+        <h1 class="text-xl m-4 text-center">Cost Breakdown</h1>
+        <CostBreakdown />
       </div>
     </AppDBProvider>
   );
