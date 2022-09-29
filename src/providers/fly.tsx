@@ -1,7 +1,4 @@
-import { Component } from "solid-js";
-import { ServiceRequest, useDb } from "../db";
-import { priceForServices, PricingTable, ServicePriceBreakdown } from "../pricing";
-import { Currency } from "../util";
+import { PricingTable } from ".";
 
 export const name = 'Fly.io';
 
@@ -37,13 +34,4 @@ export const prices: PricingTable = {
     gbOut: 0.02 // varies based on region -- price for NA region
   },
   staticIpPerMonth: 2, // first one free
-}
-
-export const FlyInlineCost: Component = () => {
-  const [db] = useDb();
-  return <Currency value={priceForServices(prices, db.requestedServices)} unit="mo" />;
-}
-
-export const FlyServiceRequestLine: Component<ServiceRequest> = (props) => {
-  return <ServicePriceBreakdown prices={prices} service={props} />
-}
+};

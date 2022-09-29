@@ -1,7 +1,4 @@
-import { Component } from "solid-js";
-import { ServiceRequest, useDb } from "../db";
-import { priceForServices, PricingTable, ServicePriceBreakdown } from "../pricing";
-import { Currency } from "../util";
+import { PricingTable } from ".";
 
 export const name = 'Render';
 
@@ -25,13 +22,4 @@ export const prices: PricingTable = {
     gbOut: 0.10,
     // gbOutFree: 100 TODO add with free tier handling
   },
-};
-
-export const RenderInlineCost: Component = () => {
-  const [db] = useDb();
-  return <Currency value={priceForServices(prices, db.requestedServices)} unit="mo" />;
-}
-
-export const RenderServiceRequestLine: Component<ServiceRequest> = (props) => {
-  return <ServicePriceBreakdown prices={prices} service={props} />
 };

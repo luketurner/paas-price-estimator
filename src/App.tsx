@@ -3,9 +3,10 @@ import { produce } from 'solid-js/store';
 
 import styles from './App.module.css';
 import { AppDBProvider, ServiceRequest, useDb } from './db';
-import { ProviderCostBreakdowns } from './providers';
+import { ProviderCostBreakdowns, ProviderCostSummaries } from './providers';
 import { FlyInlineCost, FlyServiceRequestLine } from './providers/fly';
 import { RenderInlineCost, RenderServiceRequestLine } from './providers/render';
+import { ServiceRequestForm } from './ServiceRequestForm';
 
 // const providers = [
 //   { name: 'fly.io', cpuCost: 1, memoryCost: 1, storageCost: 1, bytesInCost: 1, bytesOutCost: 1 },
@@ -19,201 +20,15 @@ import { RenderInlineCost, RenderServiceRequestLine } from './providers/render';
 //   { name: 'Porter', cpuCost: 1, memoryCost: 1, storageCost: 1, bytesInCost: 1, bytesOutCost: 1 },
 // ]
 
-
-const Select = (props: any) => {
-  return (
-    <select class="mx-2 text-black font-semibold bg-inherit border-b-slate-500 border-b" onChange={(e) => props.onChange((e.target as any).value)}>
-      <For each={props.options}>
-        {(o) => <option value={o} selected={props.selected === o}>{o}</option>}
-      </For>
-    </select>
-  )
-}
-
-const ServiceRequestEditor: Component<{
-  request: ServiceRequest;
-  requestIndex: number;
-}> = (props) => {
-  const [db, setDb] = useDb();
-  return (
-    <li class="py-2 clear-both">
-      A
-      <Select
-        options={['container', 'database']}
-        selected={props.request.serviceType}
-        onChange={(v) => setDb('requestedServices', props.requestIndex, 'serviceType', v)}
-      />
-      with:
-      <button class="mx-2 text-red-600 float-right" onClick={() => setDb('requestedServices', produce((v) => v.splice(props.requestIndex, 1)))}>[X]</button>
-      <ol class="ml-4">
-        <li>
-        A
-        <Select
-          options={['shared', 'dedicated']}
-          selected={props.request.cpuType}
-          onChange={(v) => setDb('requestedServices', props.requestIndex, 'cpuType', v)}
-        />
-        CPU with
-        <input
-          class="w-8 mx-2 text-black font-semibold border-b-slate-500 border-b"
-          // style={{width: '3em'}}
-          type="number"
-          value={props.request.cpu}
-          onChange={(e) => setDb('requestedServices', props.requestIndex, 'cpu', parseInt((e.target as any).value, 10))}
-        />
-        core{props.request.cpu === 1 ? '' : 's'} and
-        <input
-          class="w-16 mx-2 text-black font-semibold border-b-slate-500 border-b"
-          type="number"
-          value={props.request.memory}
-          step="256"
-          onChange={(e) => setDb('requestedServices', props.requestIndex, 'memory', parseInt((e.target as any).value, 10))}
-        />MB memory.
-        </li>
-
-        <For each={props.request.addons}>
-          {(addon, ix) => {
-            return (
-              <li class="clear-both">
-                <Switch fallback={<li>Unknown addon type: {addon.type}</li>}>
-                  <Match when={addon.type === 'ssd'}>
-                    An SSD with 
-                      <input
-                          class="w-16 mx-2 text-black font-semibold border-b-slate-500 border-b"
-                          type="number"
-                          value={addon.size}
-                          step="256"
-                          onChange={(e) => setDb('requestedServices', props.requestIndex, 'addons', ix(), 'size', parseInt((e.target as any).value, 10))}
-                        />
-                      MB.
-                  </Match>
-                  <Match when={addon.type === 'static-ip-v4'}>
-                    A static IPv4 address.
-                  </Match>
-                  <Match when={addon.type === 'network'}>
-                    A network with
-                      <input
-                        class="w-16 mx-2 text-black font-semibold border-b-slate-500 border-b"
-                        type="number"
-                        value={addon.egressPerSecond}
-                        step="1"
-                        onChange={(e) => setDb('requestedServices', props.requestIndex, 'addons', ix(), 'egressPerSecond', parseInt((e.target as any).value, 10))}
-                      />
-                      MB/s egress and
-                      <input
-                        class="w-16 mx-2 text-black font-semibold border-b-slate-500 border-b"
-                        type="number"
-                        value={addon.ingressPerSecond}
-                        step="256"
-                        onChange={(e) => setDb('requestedServices', props.requestIndex, 'addons', ix(), 'ingressPerSecond', parseInt((e.target as any).value, 10))}
-                      />
-                      MB/s ingress.
-                  </Match>
-                </Switch>
-                <button class="mx-2 text-red-600 float-right" onClick={() => setDb('requestedServices', props.requestIndex, 'addons', produce((v) => v.splice(ix(), 1)))}>[X]</button>
-              </li>
-            );
-          }}
-        </For>
-        <li class="clear-both">
-          <button class="mx-2 hover:underline text-lime-700"
-            onClick={() => setDb('requestedServices', props.requestIndex, 'addons', (v) => [...(v ?? []), {
-              type: 'static-ip-v4',
-          }])}>
-            [+IPv4]
-          </button>
-          <button class="mx-2 hover:underline text-lime-700"
-          onClick={() => setDb('requestedServices', props.requestIndex, 'addons', (v) => [...(v ?? []), {
-              type: 'network',
-              egressPerSecond: 0,
-              ingressPerSecond: 0,
-          }])}>
-            [+Network]
-          </button>
-          <button class="mx-2 hover:underline text-lime-700"
-            onClick={() => setDb('requestedServices', props.requestIndex, 'addons', (v) => [...(v ?? []), {
-              type: 'ssd',
-              size: 1024
-          }])}>
-            [+SSD]
-          </button>
-        </li>
-      </ol>
-    </li>
-  );
-}
-
-const AddServiceRequest = () => {
-  const [_, setDb] = useDb();
-  const addService = (s) => setDb('requestedServices', (l) => [...l, s])
-  return (
-    <div>
-      <button class="mx-2 hover:underline text-lime-700" onClick={() => addService({
-        cpu: 1,
-        cpuType: 'shared',
-        serviceType: 'container',
-        memory: 256,
-        addons: []
-      })}>[+Container]</button>
-      <button class="mx-2 hover:underline text-lime-700" onClick={() => addService({
-        cpu: 1,
-        cpuType: 'shared',
-        serviceType: 'database',
-        memory: 256,
-        addons: [{
-          type: 'ssd',
-          size: 1024
-        }]
-      })}>[+Database]</button>
-    </div>
-  )
-}
-
-const ServiceRequestList = () => {
-  const [db] = useDb();
-
-  return (
-    <div class="my-4 text-slate-600">
-      <ol>
-        <For each={db.requestedServices} fallback={<p>Add service(s) to see estimated prices across a range of PaaS providers:</p>}>
-          {(req, ix) => <ServiceRequestEditor request={req} requestIndex={ix()}/>}
-        </For>
-        <AddServiceRequest />
-      </ol>
-    </div>
-  )
-}
-
-const CostSummary = () => {
-  const [db, setDb] = useDb();
-
-  return (
-    <div>
-      <div class="my-4 cursor-pointer w-1/2 inline-block" classList={{ 'text-slate-400': db.hiddenProviders.fly }} onClick={() => setDb('hiddenProviders', 'fly', v => v ? undefined : true)}>
-        <div class="inline-block align-top w-16">Fly.io</div>
-        <div class="list-decimal ml-6 inline-block">
-          <FlyInlineCost />
-        </div>
-      </div>
-      <div class="my-4 cursor-pointer w-1/2 inline-block" classList={{ 'text-slate-400': db.hiddenProviders.render }} onClick={() => setDb('hiddenProviders', 'render', v => v ? undefined : true)}>
-        <div class="inline-block align-top w-16">Render</div>
-        <div class="list-decimal ml-6 inline-block">
-          <RenderInlineCost />
-        </div>
-      </div>
-    </div>
-  )
-}
-
 const App: Component = () => {
   return (
     <AppDBProvider>
       <div class="container mx-auto px-4 max-w-xl border-t-8 border-t-slate-400">
         <h1 class="text-2xl m-2 text-center">PaaS Price Estimator</h1>
-        <ServiceRequestList />  
+        <ServiceRequestForm />  
         <h2 class="text-xl m-2 mt-8 text-center">Summary</h2>
         <p class="text-slate-600">Click providers' names to show/hide them in the cost breakdown below.</p>
-        <CostSummary />
+        <ProviderCostSummaries />
         <h2 class="text-xl m-2 mt-8 text-center">Cost Breakdown</h2>
         <p class="text-slate-600">Itemized breakdown of the prices summarized above. Quantities are rounded to nearest cent.</p>
         <ProviderCostBreakdowns />
