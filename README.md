@@ -10,6 +10,8 @@ Mainly written as an experiment with some new front-end tools I wanted to try:
 - [Vite](https://vitejs.dev/)
 - [TailwindCSS](https://tailwindcss.com/)
 
+The latest built copy of the site is in the `docs/` directory. This directory name is used for Github Pages interop -- the contents aren't docs, but the actual compiled site.
+
 ## Planned Comparisons
 
 > ### Disclaimer on Scope
@@ -51,6 +53,6 @@ npm install
 # run dev server at localhost:3000
 npm run dev
 
-# compile into /dist
+# compile into /docs
 npm run build
 ```
