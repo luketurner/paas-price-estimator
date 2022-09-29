@@ -175,7 +175,7 @@ const ServiceRequestList = () => {
   return (
     <div class="my-4 text-slate-600">
       <ol>
-        <For each={db.requestedServices} fallback={'Add service(s) here!'}>
+        <For each={db.requestedServices} fallback={<p>Add service(s) to see estimated prices across a range of PaaS providers:</p>}>
           {(req, ix) => <ServiceRequestEditor request={req} requestIndex={ix()}/>}
         </For>
         <AddServiceRequest />
@@ -237,13 +237,22 @@ const CostBreakdown = () => {
 const App: Component = () => {
   return (
     <AppDBProvider>
-      <div class="container mx-auto px-4 max-w-xl">
-        <h1 class="text-2xl m-4 text-center">Compare PaaS Prices</h1>
-        <ServiceRequestList />
-        <h2 class="text-xl m-4 mt-8 text-center">Summary</h2>
+      <div class="container mx-auto px-4 max-w-xl border-t-8 border-t-slate-400">
+        <h1 class="text-2xl m-2 text-center">PaaS Price Estimator</h1>
+        <ServiceRequestList />  
+        <h2 class="text-xl m-2 mt-8 text-center">Summary</h2>
         <CostSummary />
-        <h2 class="text-xl m-4 mt-8 text-center">Cost Breakdown</h2>
+        <h2 class="text-xl m-2 mt-8 text-center">Cost Breakdown</h2>
         <CostBreakdown />
+        <div class="text-center">
+          Prices are hardcoded and may become outdated. (Last update: 2022-09-26)
+        </div>
+        <div class="text-center">
+          Copyright 2022 Luke Turner -- MIT Licensed
+        </div>
+        <div class="text-center">
+          <a class="underline" href="https://github.com/luketurner/paas-price-estimator">View source on Github</a>
+        </div>
       </div>
     </AppDBProvider>
   );
