@@ -60,7 +60,7 @@ export const RenderInlineCost: Component = () => {
     return cost;
   });
 
-  return <>${cost() ? cost() : 'N/A'}</>
+  return <>{cost() ? `$${cost()}/mo` : 'N/A'}</>
 }
 
 export const RenderServiceRequestLine: Component<RenderServiceRequestLineProps> = (props) => {
@@ -70,7 +70,7 @@ export const RenderServiceRequestLine: Component<RenderServiceRequestLineProps> 
   return (
     <li>
       <Show when={tier()} fallback={'No matching tier.'}>
-        {tier()?.name} ({tier().cpu} {tier().cpuType} cpu, {tier().memory} memory) - ${tier()?.costPerMonth}/month
+        {tier()?.name} ({tier().cpu} {tier().cpuType} cpu, {tier().memory} memory) - ${tier()?.costPerMonth}/mo
       </Show>
       <Show when={props.addons}>
         <ol class="ml-6">
@@ -80,13 +80,13 @@ export const RenderServiceRequestLine: Component<RenderServiceRequestLineProps> 
                 <li>
                   <Switch fallback={`Unknown service addon type: ${addon.type}`}>
                   <Match when={addon.type === 'static-ip-v4'}>
-                      N/A (Render has no individually assignable static IPs)
+                      N/A (no assignable static IPs)
                     </Match>
                     <Match when={addon.type === 'network'}>
-                      Network (${pricingTable.network.gbOut * (addon.egressPerSecond / 1024)}/second)
+                      Network (${pricingTable.network.gbOut * (addon.egressPerSecond / 1024)}/sec)
                     </Match>
                     <Match when={addon.type === 'ssd'}>
-                      SSD (${pricingTable.storage.gbCostPerMonth * (addon.size / 1000)}/month)
+                      SSD (${pricingTable.storage.gbCostPerMonth * (addon.size / 1000)}/mo)
                     </Match>
                   </Switch>
                 </li>

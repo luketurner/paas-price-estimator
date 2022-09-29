@@ -72,7 +72,7 @@ export const FlyInlineCost: Component = () => {
     return cost;
   });
 
-  return <>${cost() ? cost() : 'N/A'}</>
+  return <>{cost() ? `$${cost()}/mo`: 'N/A'}</>
 }
 
 export const FlyServiceRequestLine: Component<FlyServiceRequestLineProps> = (props) => {
