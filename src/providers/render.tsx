@@ -1,5 +1,6 @@
 import { Component, createMemo, For, Match, Show, Switch } from "solid-js";
-import { ServiceRequest, useDb } from "../db";
+import { ServiceRequest, ServiceRequestAddon, useDb } from "../db";
+import { Currency } from "../util";
 
 export const pricingTable = {
   link: 'https://render.com/pricing',
@@ -33,34 +34,67 @@ const tierFor = (req: ServiceRequest) => {
   ));
 };
 
+export const priceForAddon = (addon: ServiceRequestAddon): number => {
+  if (addon.type === 'network') {
+    return pricingTable.network.gbOut * (addon.egressPerSecond / 1024) * secondsPerMonth;
+  } else if (addon.type === 'ssd') {
+    return pricingTable.storage.gbCostPerMonth * (addon.size / 1024);
+  } else if (addon.type === 'static-ip-v4') {
+    return 0;
+  } else {
+    return 0;
+  }
+}
+
+export const priceForAddons = (addons: ServiceRequestAddon[]): number => {
+  return addons?.reduce((m, a) => m + priceForAddon(a), 0);
+}
+
+export const priceForTier = (tier: any): number => {
+  return (tier?.costPerMonth ?? 0);
+}
+
+export const priceForServiceBase = (svc: ServiceRequest): number => {
+  return priceForTier(tierFor(svc));
+}
+
+export const priceForService = (svc: ServiceRequest): number => {
+  return priceForServiceBase(svc) + priceForAddons(svc.addons);
+}
+
+export const priceForServices = (svcs: ServiceRequest[]): number => {
+  return svcs?.reduce((m, s) => m + priceForService(s), 0);
+}
+
 export interface RenderServiceRequestLineProps extends ServiceRequest {}
 
 export const RenderInlineCost: Component = () => {
   const [db] = useDb();
-  const cost = createMemo(() => {
-    let cost = 0;
+  return <Currency value={priceForServices(db.requestedServices)} unit="mo" />;
+}
 
-    for (const req of db.requestedServices) {
-      const tier = tierFor(req);
-      if (!tier) return;
-      cost += tier.costPerMonth;
-      for (const addon of req.addons) {
-        if (addon.type === 'network') {
-          cost += pricingTable.network.gbOut * (addon.egressPerSecond / 1024) * secondsPerMonth;
-        } else if (addon.type === 'ssd') {
-          cost += pricingTable.storage.gbCostPerMonth * (addon.size / 1024);
-        } else if (addon.type === 'static-ip-v4') {
-          // nothing -- no static IP support
-        } else {
-          return;
-        }
-      }
-    }
 
-    return cost;
-  });
+export interface AddonSwitchProps {
+  addon: ServiceRequestAddon;
+  staticIPv4: JSX.Element | Component<ServiceRequestAddon>;
+  network: JSX.Element | Component<ServiceRequestAddon>;
+  ssd: JSX.Element | Component<ServiceRequestAddon>;
+  fallback?: JSX.Element | Component<ServiceRequestAddon>;
+}
 
-  return <>{cost() ? `$${cost()}/mo` : 'N/A'}</>
+export const AddonSwitch: Component<AddonSwitchProps> = (props) => {
+  const type = createMemo(() => props.addon?.type);
+  const useOrCall = (x: JSX.Element | Component<ServiceRequestAddon>) => typeof x === 'function' ? x(props.addon) : x;
+  return (
+    <Switch
+      fallback={props.fallback ? useOrCall(props.fallback) : `Unknown service addon type: ${type()}`}
+    >
+      <Match when={type() === 'static-ip-v4'}>{useOrCall(props.staticIPv4)}</Match>
+      <Match when={type() === 'network'}>{useOrCall(props.network)}</Match>
+      <Match when={type() === 'ssd'}>{useOrCall(props.ssd)}</Match>
+    </Switch>
+  );
+
 }
 
 export const RenderServiceRequestLine: Component<RenderServiceRequestLineProps> = (props) => {
@@ -70,25 +104,17 @@ export const RenderServiceRequestLine: Component<RenderServiceRequestLineProps> 
   return (
     <li>
       <Show when={tier()} fallback={'No matching tier.'}>
-        {tier()?.name} ({tier().cpu} {tier().cpuType} cpu, {tier().memory} memory) - ${tier()?.costPerMonth}/mo
+        <Currency value={priceForService(props)} unit="mo" /> - {tier()?.name}
       </Show>
       <Show when={props.addons}>
-        <ol class="ml-6">
+        <ol>
+          <li><Currency value={priceForServiceBase(props)} unit="mo" /> - Base {props.serviceType} price</li>
           <For each={props.addons}>
             {(addon, ix) => {
               return (
                 <li>
-                  <Switch fallback={`Unknown service addon type: ${addon.type}`}>
-                  <Match when={addon.type === 'static-ip-v4'}>
-                      N/A (no assignable static IPs)
-                    </Match>
-                    <Match when={addon.type === 'network'}>
-                      Network (${pricingTable.network.gbOut * (addon.egressPerSecond / 1024)}/sec)
-                    </Match>
-                    <Match when={addon.type === 'ssd'}>
-                      SSD (${pricingTable.storage.gbCostPerMonth * (addon.size / 1000)}/mo)
-                    </Match>
-                  </Switch>
+                  <Currency value={priceForAddon(addon)} unit="mo" /> - 
+                  <AddonSwitch addon={addon} staticIPv4={'N/A (No static IPs)'} network={'Network egress traffic'} ssd={'SSD'}/>
                 </li>
               )
             }}
@@ -97,4 +123,4 @@ export const RenderServiceRequestLine: Component<RenderServiceRequestLineProps> 
       </Show>
     </li>
   );
-}
+};

@@ -1,5 +1,6 @@
 import { Component, createMemo, For, JSX, Match, Show, Switch } from "solid-js";
 import { ServiceRequest, ServiceRequestAddon, useDb } from "../db";
+import { Currency } from "../util";
 
 export const pricingTable = {
   link: 'https://fly.io/docs/about/pricing/',
@@ -83,7 +84,7 @@ export const FlyInlineCost: Component = () => {
   const [db] = useDb();
   const cost = createMemo(() => priceForServices(db.requestedServices));
 
-  return <>{cost() ? `$${cost()}/mo`: 'N/A'}</>
+  return <Currency value={cost()} unit="mo" />;
 }
 
 export interface AddonSwitchProps {
@@ -116,16 +117,16 @@ export const FlyServiceRequestLine: Component<FlyServiceRequestLineProps> = (pro
   return (
     <li>
       <Show when={tier()} fallback={'No matching tier.'}>
-        ${priceForService(props)}/mo - {tier()?.name}
+        <Currency value={priceForService(props)} unit="mo" /> - {tier()?.name}
       </Show>
       <Show when={props.addons}>
-        <ol class="ml-4">
-          <li>${priceForServiceBase(props)}/mo - Base</li>
+        <ol>
+          <li><Currency value={priceForServiceBase(props)} unit="mo" /> - Base {props.serviceType} price</li>
           <For each={props.addons}>
             {(addon, ix) => {
               return (
                 <li>
-                  ${priceForAddon(addon)}/mo - 
+                  <Currency value={priceForAddon(addon)} unit="mo" /> - 
                   <AddonSwitch addon={addon} staticIPv4={'Static IP'} network={'Network egress traffic'} ssd={'SSD'}/>
                 </li>
               )

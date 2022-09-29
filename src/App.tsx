@@ -212,7 +212,7 @@ const CostBreakdown = () => {
     <div>
       <div class="my-4">
         <div class="inline-block align-top w-32">Fly.io</div>
-        <ol class="list-decimal ml-6 inline-block">
+        <ol class="inline-block">
           <For each={db.requestedServices}>
             {(req, ix) => {
               return <FlyServiceRequestLine {...req} />
@@ -222,7 +222,7 @@ const CostBreakdown = () => {
       </div>
       <div class="my-4">
         <div class="inline-block align-top w-32">Render</div>
-        <ol class="list-decimal ml-6 inline-block">
+        <ol class="inline-block">
           <For each={db.requestedServices}>
             {(req, ix) => {
               return <RenderServiceRequestLine {...req} />
