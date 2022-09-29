@@ -1,5 +1,5 @@
 {
-  "name": "compare-paas-prices",
+  "name": "paas-price-estimator",
   "version": "0.0.1-SNAPSHOT",
   "description": "",
   "scripts": {

@@ -1,4 +1,4 @@
-# Compare PaaS Prices
+# PaaS Price Estimator
 
 A little app for comparing pricing/features in various "Containerized PaaS" products.
 
