@@ -1,5 +1,5 @@
-import { Component, createMemo, For, Match, Show, Switch } from "solid-js";
-import { ServiceRequest, useDb } from "../db";
+import { Component, createMemo, For, JSX, Match, Show, Switch } from "solid-js";
+import { ServiceRequest, ServiceRequestAddon, useDb } from "../db";
 
 export const pricingTable = {
   link: 'https://fly.io/docs/about/pricing/',
@@ -47,32 +47,66 @@ const secondsPerMonth = 60 * 60 * 24 * 30;
 
 export interface FlyServiceRequestLineProps extends ServiceRequest {}
 
+export const priceForAddon = (addon: ServiceRequestAddon): number => {
+  if (addon.type === 'network') {
+    return pricingTable.network.gbOut * (addon.egressPerSecond / 1024) * secondsPerMonth;
+  } else if (addon.type === 'ssd') {
+    return pricingTable.storage.gbCostPerMonth * (addon.size / 1024);
+  } else if (addon.type === 'static-ip-v4') {
+    return pricingTable.staticIpPerMonth;
+  } else {
+    return 0;
+  }
+}
+
+export const priceForAddons = (addons: ServiceRequestAddon[]): number => {
+  return addons?.reduce((m, a) => m + priceForAddon(a), 0);
+}
+
+export const priceForTier = (tier: any): number => {
+  return (tier?.costPerSecond ?? 0) * secondsPerMonth;
+}
+
+export const priceForServiceBase = (svc: ServiceRequest): number => {
+  return priceForTier(tierFor(svc));
+}
+
+export const priceForService = (svc: ServiceRequest): number => {
+  return priceForServiceBase(svc) + priceForAddons(svc.addons);
+}
+
+export const priceForServices = (svcs: ServiceRequest[]): number => {
+  return svcs?.reduce((m, s) => m + priceForService(s), 0);
+}
+
 export const FlyInlineCost: Component = () => {
   const [db] = useDb();
-  const cost = createMemo(() => {
-    let cost = 0;
-
-    for (const req of db.requestedServices) {
-      const tier = tierFor(req);
-      if (!tier) return;
-      cost += tier.costPerSecond * secondsPerMonth;
-      for (const addon of req.addons) {
-        if (addon.type === 'network') {
-          cost += pricingTable.network.gbOut * (addon.egressPerSecond / 1024) * secondsPerMonth;
-        } else if (addon.type === 'ssd') {
-          cost += pricingTable.storage.gbCostPerMonth * (addon.size / 1024);
-        } else if (addon.type === 'static-ip-v4') {
-          cost += pricingTable.staticIpPerMonth;
-        } else {
-          return;
-        }
-      }
-    }
-
-    return cost;
-  });
+  const cost = createMemo(() => priceForServices(db.requestedServices));
 
   return <>{cost() ? `$${cost()}/mo`: 'N/A'}</>
+}
+
+export interface AddonSwitchProps {
+  addon: ServiceRequestAddon;
+  staticIPv4: JSX.Element | Component<ServiceRequestAddon>;
+  network: JSX.Element | Component<ServiceRequestAddon>;
+  ssd: JSX.Element | Component<ServiceRequestAddon>;
+  fallback?: JSX.Element | Component<ServiceRequestAddon>;
+}
+
+export const AddonSwitch: Component<AddonSwitchProps> = (props) => {
+  const type = createMemo(() => props.addon?.type);
+  const useOrCall = (x: JSX.Element | Component<ServiceRequestAddon>) => typeof x === 'function' ? x(props.addon) : x;
+  return (
+    <Switch
+      fallback={props.fallback ? useOrCall(props.fallback) : `Unknown service addon type: ${type()}`}
+    >
+      <Match when={type() === 'static-ip-v4'}>{useOrCall(props.staticIPv4)}</Match>
+      <Match when={type() === 'network'}>{useOrCall(props.network)}</Match>
+      <Match when={type() === 'ssd'}>{useOrCall(props.ssd)}</Match>
+    </Switch>
+  );
+
 }
 
 export const FlyServiceRequestLine: Component<FlyServiceRequestLineProps> = (props) => {
@@ -82,25 +116,17 @@ export const FlyServiceRequestLine: Component<FlyServiceRequestLineProps> = (pro
   return (
     <li>
       <Show when={tier()} fallback={'No matching tier.'}>
-        {tier()?.name} - ${tier()?.costPerSecond}/sec
+        ${priceForService(props)}/mo - {tier()?.name}
       </Show>
       <Show when={props.addons}>
         <ol class="ml-4">
+          <li>${priceForServiceBase(props)}/mo - Base</li>
           <For each={props.addons}>
             {(addon, ix) => {
               return (
                 <li>
-                  <Switch fallback={`Unknown service addon type: ${addon.type}`}>
-                    <Match when={addon.type === 'static-ip-v4'}>
-                      Static IP (${pricingTable.staticIpPerMonth}/month)
-                    </Match>
-                    <Match when={addon.type === 'network'}>
-                      Network (${pricingTable.network.gbOut * (addon.egressPerSecond / 1024)}/second)
-                    </Match>
-                    <Match when={addon.type === 'ssd'}>
-                      SSD (${pricingTable.storage.gbCostPerMonth * (addon.size / 1000)}/month)
-                    </Match>
-                  </Switch>
+                  ${priceForAddon(addon)}/mo - 
+                  <AddonSwitch addon={addon} staticIPv4={'Static IP'} network={'Network egress traffic'} ssd={'SSD'}/>
                 </li>
               )
             }}
