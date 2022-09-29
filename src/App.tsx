@@ -1,8 +1,9 @@
-import { Component, For, Match, Switch } from 'solid-js';
+import { Component, For, Match, Show, Switch } from 'solid-js';
 import { produce } from 'solid-js/store';
 
 import styles from './App.module.css';
 import { AppDBProvider, ServiceRequest, useDb } from './db';
+import { ProviderCostBreakdowns } from './providers';
 import { FlyInlineCost, FlyServiceRequestLine } from './providers/fly';
 import { RenderInlineCost, RenderServiceRequestLine } from './providers/render';
 
@@ -184,50 +185,21 @@ const ServiceRequestList = () => {
 }
 
 const CostSummary = () => {
-  const [db] = useDb();
+  const [db, setDb] = useDb();
 
   return (
     <div>
-      <div class="my-4">
-        <div class="inline-block align-top w-32">Fly.io</div>
+      <div class="my-4 cursor-pointer w-1/2 inline-block" classList={{ 'text-slate-400': db.hiddenProviders.fly }} onClick={() => setDb('hiddenProviders', 'fly', v => v ? undefined : true)}>
+        <div class="inline-block align-top w-16">Fly.io</div>
         <div class="list-decimal ml-6 inline-block">
           <FlyInlineCost />
         </div>
       </div>
-      <div class="my-4">
-        <div class="inline-block align-top w-32">Render</div>
+      <div class="my-4 cursor-pointer w-1/2 inline-block" classList={{ 'text-slate-400': db.hiddenProviders.render }} onClick={() => setDb('hiddenProviders', 'render', v => v ? undefined : true)}>
+        <div class="inline-block align-top w-16">Render</div>
         <div class="list-decimal ml-6 inline-block">
           <RenderInlineCost />
         </div>
-      </div>
-    </div>
-  )
-}
-
-const CostBreakdown = () => {
-  const [db] = useDb();
-
-  return (
-    <div>
-      <div class="my-4">
-        <div class="inline-block align-top w-32">Fly.io</div>
-        <ol class="inline-block">
-          <For each={db.requestedServices}>
-            {(req, ix) => {
-              return <FlyServiceRequestLine {...req} />
-            }}
-          </For>
-        </ol>
-      </div>
-      <div class="my-4">
-        <div class="inline-block align-top w-32">Render</div>
-        <ol class="inline-block">
-          <For each={db.requestedServices}>
-            {(req, ix) => {
-              return <RenderServiceRequestLine {...req} />
-            }}
-          </For>
-        </ol>
       </div>
     </div>
   )
@@ -240,9 +212,11 @@ const App: Component = () => {
         <h1 class="text-2xl m-2 text-center">PaaS Price Estimator</h1>
         <ServiceRequestList />  
         <h2 class="text-xl m-2 mt-8 text-center">Summary</h2>
+        <p class="text-slate-600">Click providers' names to show/hide them in the cost breakdown below.</p>
         <CostSummary />
         <h2 class="text-xl m-2 mt-8 text-center">Cost Breakdown</h2>
-        <CostBreakdown />
+        <p class="text-slate-600">Itemized breakdown of the prices summarized above. Quantities are rounded to nearest cent.</p>
+        <ProviderCostBreakdowns />
         <div class="text-center">
           Prices are hardcoded and may become outdated. (Last update: 2022-09-26)
         </div>

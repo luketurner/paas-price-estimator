@@ -29,7 +29,8 @@ export interface ServiceRequest {
 }
 
 export interface AppDB {
-  requestedServices: ServiceRequest[] 
+  requestedServices: ServiceRequest[];
+  hiddenProviders: { [key: string]: true };
 }
 
 export type AppDBContextType = [AppDB, SetStoreFunction<AppDB>];
@@ -39,7 +40,8 @@ export type AppDBContextType = [AppDB, SetStoreFunction<AppDB>];
  */
 export const createAppDb = (): AppDBContextType => {
   const [db, setDb] = createStore<AppDB>({
-    requestedServices: []
+    requestedServices: [],
+    hiddenProviders: {},
   });
 
   // set up hash -> AppDB databinding

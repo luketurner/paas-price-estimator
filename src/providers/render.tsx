@@ -3,6 +3,8 @@ import { ServiceRequest, useDb } from "../db";
 import { priceForServices, PricingTable, ServicePriceBreakdown } from "../pricing";
 import { Currency } from "../util";
 
+export const name = 'Render';
+
 export const prices: PricingTable = {
   link: 'https://render.com/pricing',
   tiers: [

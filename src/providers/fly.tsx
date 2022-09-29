@@ -3,6 +3,8 @@ import { ServiceRequest, useDb } from "../db";
 import { priceForServices, PricingTable, ServicePriceBreakdown } from "../pricing";
 import { Currency } from "../util";
 
+export const name = 'Fly.io';
+
 export const prices: PricingTable = {
   link: 'https://fly.io/docs/about/pricing/',
   tiers: [
