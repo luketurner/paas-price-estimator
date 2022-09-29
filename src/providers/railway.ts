@@ -4,6 +4,7 @@ export const name = 'Railway';
 
 export const prices: PricingTable = {
   link: 'https://railway.app/pricing',
+  lastUpdated: '',
   tiers: [
     { name: '', cpu: 1, cpuType: 'dedicated', memory: 1024, costPerSecond: 0 },
   ],

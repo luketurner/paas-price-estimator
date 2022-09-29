@@ -4,6 +4,7 @@ export const name = 'AWS Fargate';
 
 export const prices: PricingTable = {
   link: 'https://aws.amazon.com/fargate/pricing/',
+  lastUpdated: '',
   tiers: [
     { name: '', cpu: 1, cpuType: 'dedicated', memory: 1024, costPerSecond: 0 },
   ],

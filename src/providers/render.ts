@@ -4,6 +4,7 @@ export const name = 'Render';
 
 export const prices: PricingTable = {
   link: 'https://render.com/pricing',
+  lastUpdated: '2022-09-26',
   tiers: [
     { name: 'Starter', cpu: 0.5, cpuType: 'dedicated', memory: 512, costPerMonth: 7 },
     { name: 'Starter Plus', cpu: 1,   cpuType: 'dedicated', memory: 1024, costPerMonth: 15 },

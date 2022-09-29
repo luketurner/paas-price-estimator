@@ -4,6 +4,7 @@ export const name = 'Fly.io';
 
 export const prices: PricingTable = {
   link: 'https://fly.io/docs/about/pricing/',
+  lastUpdated: '2022-09-26',
   tiers: [
     { name: 'shared-cpu-1x (256 MB)', cpu: 1, cpuType: 'shared', memory: 256,  costPerSecond: 0.0000008 },
     { name: 'shared-cpu-1x (512 MB)', cpu: 1, cpuType: 'shared', memory: 512,  costPerSecond: 0.0000012 },

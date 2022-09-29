@@ -44,6 +44,7 @@ export interface PricingTable {
   storage: StoragePricing;
   network: NetworkPricing;
   staticIpPerMonth?: number;
+  lastUpdated: string;
 }
 
 export const tierFor = (prices: PricingTable, req: ServiceRequest) => {

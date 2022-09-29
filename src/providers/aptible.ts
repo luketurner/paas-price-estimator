@@ -4,6 +4,7 @@ export const name = 'Aptible';
 
 export const prices: PricingTable = {
   link: 'https://www.aptible.com/pricing-plans',
+  lastUpdated: '',
   tiers: [
     { name: '', cpu: 1, cpuType: 'dedicated', memory: 1024, costPerSecond: 0 },
   ],

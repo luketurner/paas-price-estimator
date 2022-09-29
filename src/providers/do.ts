@@ -4,6 +4,7 @@ export const name = 'DigitalOcean App';
 
 export const prices: PricingTable = {
   link: 'https://www.digitalocean.com/pricing/app-platform',
+  lastUpdated: '',
   tiers: [
     { name: '', cpu: 1, cpuType: 'dedicated', memory: 1024, costPerSecond: 0 },
   ],

@@ -4,6 +4,7 @@ export const name = 'Heroku';
 
 export const prices: PricingTable = {
   link: 'https://www.heroku.com/pricing',
+  lastUpdated: '',
   tiers: [
     { name: '', cpu: 1, cpuType: 'dedicated', memory: 1024, costPerSecond: 0 },
   ],

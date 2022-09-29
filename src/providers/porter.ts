@@ -4,6 +4,7 @@ export const name = 'Porter';
 
 export const prices: PricingTable = {
   link: 'https://porter.run/pricing',
+  lastUpdated: '',
   tiers: [
     { name: '', cpu: 1, cpuType: 'dedicated', memory: 1024, costPerSecond: 0 },
   ],
