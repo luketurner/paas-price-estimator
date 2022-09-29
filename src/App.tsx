@@ -1,24 +1,7 @@
-import { Component, For, Match, Show, Switch } from 'solid-js';
-import { produce } from 'solid-js/store';
-
-import styles from './App.module.css';
-import { AppDBProvider, ServiceRequest, useDb } from './db';
+import { Component } from 'solid-js';
+import { AppDBProvider } from './db';
 import { ProviderCostBreakdowns, ProviderCostSummaries } from './providers';
-import { FlyInlineCost, FlyServiceRequestLine } from './providers/fly';
-import { RenderInlineCost, RenderServiceRequestLine } from './providers/render';
 import { ServiceRequestForm } from './ServiceRequestForm';
-
-// const providers = [
-//   { name: 'fly.io', cpuCost: 1, memoryCost: 1, storageCost: 1, bytesInCost: 1, bytesOutCost: 1 },
-//   { name: 'DO App Platform', cpuCost: 1, memoryCost: 1, storageCost: 1, bytesInCost: 1, bytesOutCost: 1 },
-//   { name: 'Render', cpuCost: 1, memoryCost: 1, storageCost: 1, bytesInCost: 1, bytesOutCost: 1 },
-//   { name: 'Railway', cpuCost: 1, memoryCost: 1, storageCost: 1, bytesInCost: 1, bytesOutCost: 1 },
-//   { name: 'Heroku', cpuCost: 1, memoryCost: 1, storageCost: 1, bytesInCost: 1, bytesOutCost: 1 },
-//   { name: 'Aptible', cpuCost: 1, memoryCost: 1, storageCost: 1, bytesInCost: 1, bytesOutCost: 1 },
-//   { name: 'GCP Cloud Run', cpuCost: 1, memoryCost: 1, storageCost: 1, bytesInCost: 1, bytesOutCost: 1 },
-//   { name: 'AWS Fargate', cpuCost: 1, memoryCost: 1, storageCost: 1, bytesInCost: 1, bytesOutCost: 1 },
-//   { name: 'Porter', cpuCost: 1, memoryCost: 1, storageCost: 1, bytesInCost: 1, bytesOutCost: 1 },
-// ]
 
 const App: Component = () => {
   return (
