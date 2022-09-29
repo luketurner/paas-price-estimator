@@ -1,9 +1,8 @@
-import { Accessor, Component, createEffect, For, Match, Switch } from 'solid-js';
-import { createStore, produce } from 'solid-js/store';
+import { Component, For, Match, Switch } from 'solid-js';
+import { produce } from 'solid-js/store';
 
 import styles from './App.module.css';
-import { AppDBProvider, createAppDb, ServiceRequest, useDb } from './db';
-import { providers } from './pricing';
+import { AppDBProvider, ServiceRequest, useDb } from './db';
 import { FlyInlineCost, FlyServiceRequestLine } from './providers/fly';
 import { RenderInlineCost, RenderServiceRequestLine } from './providers/render';
 
@@ -96,7 +95,7 @@ const ServiceRequestEditor: Component<{
                         class="w-16 mx-2 text-black font-semibold border-b-slate-500 border-b"
                         type="number"
                         value={addon.egressPerSecond}
-                        step="256"
+                        step="1"
                         onChange={(e) => setDb('requestedServices', props.requestIndex, 'addons', ix(), 'egressPerSecond', parseInt((e.target as any).value, 10))}
                       />
                       MB/s egress and
