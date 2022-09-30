@@ -51,7 +51,7 @@ const ServiceRequestEditor: Component<{
           value={props.request.mem}
           step="256"
           onChange={(e) => setDb('svc', props.requestIndex, 'mem', parseInt((e.target as any).value, 10))}
-        />MB mem.
+        />MB memory.
         </li>
 
         <For each={props.request.add}>
@@ -65,10 +65,10 @@ const ServiceRequestEditor: Component<{
                           class="w-16 mx-2 text-black font-semibold border-b-slate-500 border-b"
                           type="number"
                           value={addon.size}
-                          step="256"
+                          step="1"
                           onChange={(e) => setDb('svc', props.requestIndex, 'add', ix(), 'size', parseInt((e.target as any).value, 10))}
                         />
-                      MB.
+                      GB.
                   </Match>
                   <Match when={addon.type === 'ipv4'}>
                     A static IPv4 address.
@@ -82,15 +82,15 @@ const ServiceRequestEditor: Component<{
                         step="1"
                         onChange={(e) => setDb('svc', props.requestIndex, 'add', ix(), 'out', parseInt((e.target as any).value, 10))}
                       />
-                      MB/s egress and
+                      GB/mo egress and
                       <input
                         class="w-16 mx-2 text-black font-semibold border-b-slate-500 border-b"
                         type="number"
                         value={addon.in}
-                        step="256"
+                        step="1"
                         onChange={(e) => setDb('svc', props.requestIndex, 'add', ix(), 'in', parseInt((e.target as any).value, 10))}
                       />
-                      MB/s ingress.
+                      GB/mo ingress.
                   </Match>
                 </Switch>
                 <button class="mx-2 text-red-600 float-right" onClick={() => setDb('svc', props.requestIndex, 'add', produce((v) => v.splice(ix(), 1)))}>[X]</button>
@@ -116,7 +116,7 @@ const ServiceRequestEditor: Component<{
           <button class="mx-2 hover:underline text-lime-700"
             onClick={() => setDb('svc', props.requestIndex, 'add', (v) => [...(v ?? []), {
               type: 'ssd',
-              size: 1024
+              size: 1
           }])}>
             [+SSD]
           </button>

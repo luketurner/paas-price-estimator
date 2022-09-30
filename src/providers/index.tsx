@@ -59,9 +59,9 @@ export const tierFor = (prices: PricingTable, req: ServiceRequest) => {
 
 export const priceForAddon = (prices: PricingTable, addon: ServiceRequestAddon): number => {
   if (addon.type === 'net') {
-    return prices.net.gbOut * (addon.out / 1024) * secondsPerMonth;
+    return prices.net.gbOut * addon.out;
   } else if (addon.type === 'ssd') {
-    return prices.storage.gbCostPerMonth * (addon.size / 1024);
+    return prices.storage.gbCostPerMonth * addon.size;
   } else if (addon.type === 'ipv4') {
     return prices.staticIpPerMonth ?? 0;
   } else {
