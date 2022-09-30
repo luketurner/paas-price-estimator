@@ -4,16 +4,19 @@ import { AddonSwitch, Currency } from '../util';
 import * as fly from './fly';
 import * as render from './render';
 import * as digitalOcean from './do';
+import * as aptible from './aptible';
 
+const hoursPerMonth = 24 * 30;
 const secondsPerMonth = 60 * 60 * 24 * 30;
 
 export const providers: ProviderTable = {
   fly,
   render,
   do: digitalOcean,
+  aptible,
 };
 
-export type ProviderID = 'fly' | 'render' | 'do';
+export type ProviderID = 'fly' | 'render' | 'do' | 'aptible';
 
 export interface Provider {
   prices: PricingTable;
@@ -29,6 +32,7 @@ export interface PricingTier {
   mem: number;
   costPerSecond?: number;
   costPerMonth?: number;
+  costPerHour?: number;
 }
 
 export interface StoragePricing {
@@ -74,7 +78,9 @@ export const priceForAddons = (prices: PricingTable, add: ServiceRequestAddon[])
 };
 
 export const priceForTier = (tier?: PricingTier): number => {
-  return tier?.costPerMonth ? tier?.costPerMonth : (tier?.costPerSecond ?? 0) * secondsPerMonth;
+  return tier?.costPerMonth ? tier?.costPerMonth
+       : tier?.costPerHour ? tier?.costPerHour * hoursPerMonth
+       : (tier?.costPerSecond ?? 0) * secondsPerMonth;
 };
 
 export const priceForServiceBase = (prices: PricingTable, svc: ServiceRequest): number => {
