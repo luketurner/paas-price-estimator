@@ -77,9 +77,9 @@ const ServiceRequestEditor: Component<{
                     A static IPv4 address.
                   </Match>
                   <Match when={addon.type === 'net'}>
-                    A net with
+                    A network with
                       <input
-                        class="w-16 mx-2 text-black font-semibold border-b-slate-500 border-b"
+                        class="w-12 mx-2 text-black font-semibold border-b-slate-500 border-b"
                         type="number"
                         value={addon.out}
                         step="1"
@@ -87,7 +87,7 @@ const ServiceRequestEditor: Component<{
                       />
                       GB/mo egress and
                       <input
-                        class="w-16 mx-2 text-black font-semibold border-b-slate-500 border-b"
+                        class="w-12 mx-2 text-black font-semibold border-b-slate-500 border-b"
                         type="number"
                         value={addon.in}
                         step="1"
