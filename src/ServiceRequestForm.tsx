@@ -22,7 +22,10 @@ const ServiceRequestEditor: Component<{
     <li class="py-2 clear-both">
       A
       <Select
-        options={{ co: 'container', db: 'database' }}
+        options={{
+          co: 'container',
+          // db: 'database'
+        }}
         selected={props.request.type}
         onChange={(v) => setDb('svc', props.requestIndex, 'type', v)}
       />
@@ -138,16 +141,6 @@ const AddServiceRequest = () => {
         mem: 256,
         add: []
       })}>[+Container]</button>
-      <button class="mx-2 hover:underline text-lime-700" onClick={() => addService({
-        cpu: 1,
-        ct: 'sh',
-        type: 'db',
-        mem: 256,
-        add: [{
-          type: 'ssd',
-          size: 1024
-        }]
-      })}>[+Database]</button>
     </div>
   )
 }
