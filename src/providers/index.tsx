@@ -107,7 +107,7 @@ export const ServicePriceBreakdown: Component<ServicePriceBreakdownProps> = (pro
       </Show>
       <Show when={props.service.add}>
         <ol>
-          <li><Currency value={priceForServiceBase(props.prices, props.service)} unit="mo" /> - Base {props.service.type} price</li>
+          <li><Currency value={priceForServiceBase(props.prices, props.service)} unit="mo" /> - Base price</li>
           <For each={props.service.add}>
             {(addon, ix) => {
               return (
