@@ -23,9 +23,6 @@ const MainPage: Component = () => {
     <>
       <ServiceRequestForm />
       <CostInformation />
-      <div class="text-center text-slate-600">
-        Prices are hardcoded and may become outdated. (Last update: 2022-09-26)
-      </div>
     </>
   )
 }
