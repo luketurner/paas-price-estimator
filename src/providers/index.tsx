@@ -3,15 +3,17 @@ import { ServiceRequest, ServiceRequestAddon, useDb } from '../db';
 import { AddonSwitch, Currency } from '../util';
 import * as fly from './fly';
 import * as render from './render';
+import * as digitalOcean from './do';
 
 const secondsPerMonth = 60 * 60 * 24 * 30;
 
 export const providers: ProviderTable = {
   fly,
-  render
+  render,
+  do: digitalOcean,
 };
 
-export type ProviderID = 'fly' | 'render';
+export type ProviderID = 'fly' | 'render' | 'do';
 
 export interface Provider {
   prices: PricingTable;
