@@ -49,7 +49,6 @@ export const createAppDb = (): AppDBContextType => {
     const currentHash = window.location.hash;
     try {
       if (currentHash.length > 1) {
-        console.debug("hash", atob(currentHash.slice(1)));
         setDb(JSON.parse(atob(currentHash.slice(1))));
       }
     } catch (e) {
