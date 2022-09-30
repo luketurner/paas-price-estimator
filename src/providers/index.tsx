@@ -5,6 +5,7 @@ import * as fly from './fly';
 import * as render from './render';
 import * as digitalOcean from './do';
 import * as aptible from './aptible';
+import * as fargate from './fargate';
 
 const hoursPerMonth = 24 * 30;
 const secondsPerMonth = 60 * 60 * 24 * 30;
@@ -14,9 +15,10 @@ export const providers: ProviderTable = {
   render,
   do: digitalOcean,
   aptible,
+  fargate,
 };
 
-export type ProviderID = 'fly' | 'render' | 'do' | 'aptible';
+export type ProviderID = 'fly' | 'render' | 'do' | 'aptible' | 'fargate';
 
 export interface Provider {
   prices: PricingTable;
@@ -50,6 +52,7 @@ export interface PricingTable {
   storage: StoragePricing;
   net: NetworkPricing;
   staticIpPerMonth?: number;
+  staticIpPerHour?: number;
   lastUpdated: string;
 }
 
@@ -67,7 +70,7 @@ export const priceForAddon = (prices: PricingTable, addon: ServiceRequestAddon):
   } else if (addon.type === 'ssd') {
     return prices.storage.gbCostPerMonth * addon.size;
   } else if (addon.type === 'ipv4') {
-    return prices.staticIpPerMonth ?? 0;
+    return prices.staticIpPerHour ? prices.staticIpPerHour * hoursPerMonth : prices.staticIpPerMonth ?? 0;
   } else {
     return 0;
   }
