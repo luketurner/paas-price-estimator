@@ -6,9 +6,9 @@ export const prices: PricingTable = {
   link: 'https://cloud.google.com/run#section-13',
   lastUpdated: '',
   tiers: [
-    { name: '', cpu: 1, cpuType: 'dedicated', memory: 1024, costPerSecond: 0 },
+    { name: '', cpu: 1, ct: 'de', mem: 1024, costPerSecond: 0 },
   ],
-  network: {
+  net: {
     gbIn: 0,
     gbOut: 0,
   },

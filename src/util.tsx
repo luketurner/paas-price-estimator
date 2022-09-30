@@ -15,7 +15,7 @@ export const Currency: Component<CurrencyProps> = (p) => (
 export interface AddonSwitchProps {
   addon: ServiceRequestAddon;
   staticIPv4: JSX.Element | Component<ServiceRequestAddon>;
-  network: JSX.Element | Component<ServiceRequestAddon>;
+  net: JSX.Element | Component<ServiceRequestAddon>;
   ssd: JSX.Element | Component<ServiceRequestAddon>;
   fallback?: JSX.Element | Component<ServiceRequestAddon>;
 }
@@ -27,8 +27,8 @@ export const AddonSwitch: Component<AddonSwitchProps> = (props) => {
     <Switch
       fallback={props.fallback ? useOrCall(props.fallback) : `Unknown service addon type: ${type()}`}
     >
-      <Match when={type() === 'static-ip-v4'}>{useOrCall(props.staticIPv4)}</Match>
-      <Match when={type() === 'network'}>{useOrCall(props.network)}</Match>
+      <Match when={type() === 'ipv4'}>{useOrCall(props.staticIPv4)}</Match>
+      <Match when={type() === 'net'}>{useOrCall(props.net)}</Match>
       <Match when={type() === 'ssd'}>{useOrCall(props.ssd)}</Match>
     </Switch>
   );

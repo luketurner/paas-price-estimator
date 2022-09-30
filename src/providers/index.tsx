@@ -25,8 +25,8 @@ export type ProviderTable = Record<ProviderID, Provider>;
 export interface PricingTier {
   name: string;
   cpu: number;
-  cpuType: 'shared' | 'dedicated';
-  memory: number;
+  ct: 'sh' | 'de';
+  mem: number;
   costPerSecond?: number;
   costPerMonth?: number;
 }
@@ -44,7 +44,7 @@ export interface PricingTable {
   link: string;
   tiers: PricingTier[];
   storage: StoragePricing;
-  network: NetworkPricing;
+  net: NetworkPricing;
   staticIpPerMonth?: number;
   lastUpdated: string;
 }
@@ -52,25 +52,25 @@ export interface PricingTable {
 export const tierFor = (prices: PricingTable, req: ServiceRequest) => {
   return prices.tiers.find(tier => (
     tier.cpu >= req.cpu &&
-    (req.cpuType === 'shared' ? true : tier.cpuType === 'dedicated') &&
-    tier.memory >= req.memory
+    (req.ct === 'sh' ? true : tier.ct === 'de') &&
+    tier.mem >= req.mem
   ));
 };
 
 export const priceForAddon = (prices: PricingTable, addon: ServiceRequestAddon): number => {
-  if (addon.type === 'network') {
-    return prices.network.gbOut * (addon.egressPerSecond / 1024) * secondsPerMonth;
+  if (addon.type === 'net') {
+    return prices.net.gbOut * (addon.out / 1024) * secondsPerMonth;
   } else if (addon.type === 'ssd') {
     return prices.storage.gbCostPerMonth * (addon.size / 1024);
-  } else if (addon.type === 'static-ip-v4') {
+  } else if (addon.type === 'ipv4') {
     return prices.staticIpPerMonth ?? 0;
   } else {
     return 0;
   }
 };
 
-export const priceForAddons = (prices: PricingTable, addons: ServiceRequestAddon[]): number => {
-  return addons?.reduce((m, a) => m + priceForAddon(prices, a), 0);
+export const priceForAddons = (prices: PricingTable, add: ServiceRequestAddon[]): number => {
+  return add?.reduce((m, a) => m + priceForAddon(prices, a), 0);
 };
 
 export const priceForTier = (tier?: PricingTier): number => {
@@ -82,7 +82,7 @@ export const priceForServiceBase = (prices: PricingTable, svc: ServiceRequest): 
 };
 
 export const priceForService = (prices: PricingTable, svc: ServiceRequest): number => {
-  return priceForServiceBase(prices, svc) + priceForAddons(prices, svc.addons);
+  return priceForServiceBase(prices, svc) + priceForAddons(prices, svc.add);
 };
 
 export const priceForServices = (prices: PricingTable, svcs: ServiceRequest[]): number => {
@@ -93,7 +93,7 @@ export interface ServicePriceBreakdownProps {
   prices: PricingTable;
   service: ServiceRequest;
   staticIPv4?: JSX.Element | Component<ServiceRequestAddon>;
-  network?: JSX.Element | Component<ServiceRequestAddon>;
+  net?: JSX.Element | Component<ServiceRequestAddon>;
   ssd?: JSX.Element | Component<ServiceRequestAddon>;
   fallback?: JSX.Element | Component<ServiceRequestAddon>;
 }
@@ -105,15 +105,15 @@ export const ServicePriceBreakdown: Component<ServicePriceBreakdownProps> = (pro
       <Show when={tier()} fallback={'No matching service offering.'}>
         <Currency value={priceForService(props.prices, props.service)} unit="mo" /> - {tier()?.name}
       </Show>
-      <Show when={props.service.addons}>
+      <Show when={props.service.add}>
         <ol>
-          <li><Currency value={priceForServiceBase(props.prices, props.service)} unit="mo" /> - Base {props.service.serviceType} price</li>
-          <For each={props.service.addons}>
+          <li><Currency value={priceForServiceBase(props.prices, props.service)} unit="mo" /> - Base {props.service.type} price</li>
+          <For each={props.service.add}>
             {(addon, ix) => {
               return (
                 <li>
                   <Currency value={priceForAddon(props.prices, addon)} unit="mo" /> - 
-                  <AddonSwitch addon={addon} staticIPv4={props.staticIPv4 ?? 'Static IP'} network={props.network ?? 'Network egress traffic'} ssd={props.ssd ?? 'SSD'}/>
+                  <AddonSwitch addon={addon} staticIPv4={props.staticIPv4 ?? 'Static IP'} net={props.net ?? 'Network egress traffic'} ssd={props.ssd ?? 'SSD'}/>
                 </li>
               )
             }}
@@ -133,11 +133,11 @@ export const ProviderCostSummaries = () => {
         return (
             <div
               class="my-4 cursor-pointer w-1/2 inline-block"
-              classList={{ 'text-slate-400': db.hiddenProviders[p] }} onClick={() => setDb('hiddenProviders', p, v => v ? undefined : true)}
+              classList={{ 'text-slate-400': db.prv[p] }} onClick={() => setDb('prv', p, v => v ? undefined : true)}
             >
               <div class="inline-block align-top w-16">{providers[p].name}</div>
               <div class="list-decimal ml-6 inline-block">
-                <Currency value={priceForServices(providers[p].prices, db.requestedServices)} unit="mo" />
+                <Currency value={priceForServices(providers[p].prices, db.svc)} unit="mo" />
               </div>
             </div>
         );
@@ -153,11 +153,11 @@ export const ProviderCostBreakdowns: Component = () => {
     <For each={Object.keys(providers) as ProviderID[]}>
       {(p, ix) => {
         return (
-          <Show when={!db.hiddenProviders[p]}>
+          <Show when={!db.prv[p]}>
             <div class="my-4">
               <div class="inline-block align-top w-32">{providers[p].name}</div>
               <ol class="inline-block">
-                <For each={db.requestedServices}>
+                <For each={db.svc}>
                   {(req, ix) => {
                     return <ServicePriceBreakdown prices={providers[p].prices} service={req} />
                   }}

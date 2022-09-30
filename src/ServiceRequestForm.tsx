@@ -6,8 +6,8 @@ import { ServiceRequest, useDb } from "./db";
 const Select = (props: any) => {
   return (
     <select class="mx-2 text-black font-semibold bg-inherit border-b-slate-500 border-b" onChange={(e) => props.onChange((e.target as any).value)}>
-      <For each={props.options}>
-        {(o) => <option value={o} selected={props.selected === o}>{o}</option>}
+      <For each={Object.keys(props.options)}>
+        {(o) => <option value={o} selected={props.selected === o}>{props.options[o]}</option>}
       </For>
     </select>
   )
@@ -22,19 +22,19 @@ const ServiceRequestEditor: Component<{
     <li class="py-2 clear-both">
       A
       <Select
-        options={['container', 'database']}
-        selected={props.request.serviceType}
-        onChange={(v) => setDb('requestedServices', props.requestIndex, 'serviceType', v)}
+        options={{ co: 'container', db: 'database' }}
+        selected={props.request.type}
+        onChange={(v) => setDb('svc', props.requestIndex, 'type', v)}
       />
       with:
-      <button class="mx-2 text-red-600 float-right" onClick={() => setDb('requestedServices', produce((v) => v.splice(props.requestIndex, 1)))}>[X]</button>
+      <button class="mx-2 text-red-600 float-right" onClick={() => setDb('svc', produce((v) => v.splice(props.requestIndex, 1)))}>[X]</button>
       <ol class="ml-4">
         <li>
         A
         <Select
-          options={['shared', 'dedicated']}
-          selected={props.request.cpuType}
-          onChange={(v) => setDb('requestedServices', props.requestIndex, 'cpuType', v)}
+          options={{ sh: 'shared', de: 'dedicated' }}
+          selected={props.request.ct}
+          onChange={(v) => setDb('svc', props.requestIndex, 'ct', v)}
         />
         CPU with
         <input
@@ -42,19 +42,19 @@ const ServiceRequestEditor: Component<{
           // style={{width: '3em'}}
           type="number"
           value={props.request.cpu}
-          onChange={(e) => setDb('requestedServices', props.requestIndex, 'cpu', parseInt((e.target as any).value, 10))}
+          onChange={(e) => setDb('svc', props.requestIndex, 'cpu', parseInt((e.target as any).value, 10))}
         />
         core{props.request.cpu === 1 ? '' : 's'} and
         <input
           class="w-16 mx-2 text-black font-semibold border-b-slate-500 border-b"
           type="number"
-          value={props.request.memory}
+          value={props.request.mem}
           step="256"
-          onChange={(e) => setDb('requestedServices', props.requestIndex, 'memory', parseInt((e.target as any).value, 10))}
-        />MB memory.
+          onChange={(e) => setDb('svc', props.requestIndex, 'mem', parseInt((e.target as any).value, 10))}
+        />MB mem.
         </li>
 
-        <For each={props.request.addons}>
+        <For each={props.request.add}>
           {(addon, ix) => {
             return (
               <li class="clear-both">
@@ -66,55 +66,55 @@ const ServiceRequestEditor: Component<{
                           type="number"
                           value={addon.size}
                           step="256"
-                          onChange={(e) => setDb('requestedServices', props.requestIndex, 'addons', ix(), 'size', parseInt((e.target as any).value, 10))}
+                          onChange={(e) => setDb('svc', props.requestIndex, 'add', ix(), 'size', parseInt((e.target as any).value, 10))}
                         />
                       MB.
                   </Match>
-                  <Match when={addon.type === 'static-ip-v4'}>
+                  <Match when={addon.type === 'ipv4'}>
                     A static IPv4 address.
                   </Match>
-                  <Match when={addon.type === 'network'}>
-                    A network with
+                  <Match when={addon.type === 'net'}>
+                    A net with
                       <input
                         class="w-16 mx-2 text-black font-semibold border-b-slate-500 border-b"
                         type="number"
-                        value={addon.egressPerSecond}
+                        value={addon.out}
                         step="1"
-                        onChange={(e) => setDb('requestedServices', props.requestIndex, 'addons', ix(), 'egressPerSecond', parseInt((e.target as any).value, 10))}
+                        onChange={(e) => setDb('svc', props.requestIndex, 'add', ix(), 'out', parseInt((e.target as any).value, 10))}
                       />
                       MB/s egress and
                       <input
                         class="w-16 mx-2 text-black font-semibold border-b-slate-500 border-b"
                         type="number"
-                        value={addon.ingressPerSecond}
+                        value={addon.in}
                         step="256"
-                        onChange={(e) => setDb('requestedServices', props.requestIndex, 'addons', ix(), 'ingressPerSecond', parseInt((e.target as any).value, 10))}
+                        onChange={(e) => setDb('svc', props.requestIndex, 'add', ix(), 'in', parseInt((e.target as any).value, 10))}
                       />
                       MB/s ingress.
                   </Match>
                 </Switch>
-                <button class="mx-2 text-red-600 float-right" onClick={() => setDb('requestedServices', props.requestIndex, 'addons', produce((v) => v.splice(ix(), 1)))}>[X]</button>
+                <button class="mx-2 text-red-600 float-right" onClick={() => setDb('svc', props.requestIndex, 'add', produce((v) => v.splice(ix(), 1)))}>[X]</button>
               </li>
             );
           }}
         </For>
         <li class="clear-both">
           <button class="mx-2 hover:underline text-lime-700"
-            onClick={() => setDb('requestedServices', props.requestIndex, 'addons', (v) => [...(v ?? []), {
-              type: 'static-ip-v4',
+            onClick={() => setDb('svc', props.requestIndex, 'add', (v) => [...(v ?? []), {
+              type: 'ipv4',
           }])}>
             [+IPv4]
           </button>
           <button class="mx-2 hover:underline text-lime-700"
-          onClick={() => setDb('requestedServices', props.requestIndex, 'addons', (v) => [...(v ?? []), {
-              type: 'network',
-              egressPerSecond: 0,
-              ingressPerSecond: 0,
+          onClick={() => setDb('svc', props.requestIndex, 'add', (v) => [...(v ?? []), {
+              type: 'net',
+              out: 0,
+              in: 0,
           }])}>
             [+Network]
           </button>
           <button class="mx-2 hover:underline text-lime-700"
-            onClick={() => setDb('requestedServices', props.requestIndex, 'addons', (v) => [...(v ?? []), {
+            onClick={() => setDb('svc', props.requestIndex, 'add', (v) => [...(v ?? []), {
               type: 'ssd',
               size: 1024
           }])}>
@@ -128,22 +128,22 @@ const ServiceRequestEditor: Component<{
 
 const AddServiceRequest = () => {
   const [_, setDb] = useDb();
-  const addService = (s) => setDb('requestedServices', (l) => [...l, s])
+  const addService = (s) => setDb('svc', (l) => [...l, s])
   return (
     <div>
       <button class="mx-2 hover:underline text-lime-700" onClick={() => addService({
         cpu: 1,
-        cpuType: 'shared',
-        serviceType: 'container',
-        memory: 256,
-        addons: []
+        ct: 'sh',
+        type: 'co',
+        mem: 256,
+        add: []
       })}>[+Container]</button>
       <button class="mx-2 hover:underline text-lime-700" onClick={() => addService({
         cpu: 1,
-        cpuType: 'shared',
-        serviceType: 'database',
-        memory: 256,
-        addons: [{
+        ct: 'sh',
+        type: 'db',
+        mem: 256,
+        add: [{
           type: 'ssd',
           size: 1024
         }]
@@ -158,7 +158,7 @@ export const ServiceRequestForm = () => {
   return (
     <div class="my-4 text-slate-600">
       <ol>
-        <For each={db.requestedServices} fallback={<p>Add service(s) to see estimated prices across a range of PaaS providers:</p>}>
+        <For each={db.svc} fallback={<p>Add service(s) to see estimated prices across a range of PaaS providers:</p>}>
           {(req, ix) => <ServiceRequestEditor request={req} requestIndex={ix()}/>}
         </For>
         <AddServiceRequest />

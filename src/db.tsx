@@ -4,13 +4,13 @@ import { createStore, SetStoreFunction } from "solid-js/store";
 type Megabyte = number;
 
 export interface ServiceRequestAddonNetwork {
-  type: 'network';
-  ingressPerSecond: Megabyte;
-  egressPerSecond: Megabyte;
+  type: 'net';
+  in: Megabyte;
+  out: Megabyte;
 }
 
 export interface ServiceRequestAddonStaticIPv4 {
-  type: 'static-ip-v4';
+  type: 'ipv4';
 }
 
 export interface ServiceRequestAddonSSD {
@@ -22,15 +22,15 @@ export type ServiceRequestAddon = ServiceRequestAddonNetwork | ServiceRequestAdd
 
 export interface ServiceRequest {
   cpu: number;
-  cpuType: 'shared' | 'dedicated';
-  serviceType: 'container' | 'database';
-  memory: Megabyte;
-  addons: ServiceRequestAddon[]
+  ct: 'sh' | 'de';
+  type: 'co' | 'db';
+  mem: Megabyte;
+  add: ServiceRequestAddon[]
 }
 
 export interface AppDB {
-  requestedServices: ServiceRequest[];
-  hiddenProviders: { [key: string]: true };
+  svc: ServiceRequest[];
+  prv: { [key: string]: true };
 }
 
 export type AppDBContextType = [AppDB, SetStoreFunction<AppDB>];
@@ -40,8 +40,8 @@ export type AppDBContextType = [AppDB, SetStoreFunction<AppDB>];
  */
 export const createAppDb = (): AppDBContextType => {
   const [db, setDb] = createStore<AppDB>({
-    requestedServices: [],
-    hiddenProviders: {},
+    svc: [],
+    prv: {},
   });
 
   // set up hash -> AppDB databinding
