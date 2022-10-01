@@ -29,9 +29,15 @@ export const AboutPage = () => {
       </p>
       <ul class="list-disc ml-8">
         <li>Free tiers are currently not included in estimates.</li>
+        <li>Shared CPUs and fractional CPUs may be handled inconsistently across providers.</li>
+        <li>A variety of other cost calculations could be improved (e.g. tiered network throughput pricing is not yet supported)</li>
+        <li>Include more priceable features (certificates, backups, ephemeral storage, etc.)</li>
         <li>Only subset of the desired providers are supported.</li>
-        <li>Only containers are supported. (Want to add managed databases as well.)</li>
+        <li>Only containers are supported. (Want to add managed databases, object storage, etc.)</li>
       </ul>
+      <p class="my-2">
+        If you see any prices that are significantly wrong, feel free to open an issue in Github (link in the footer).
+      </p>
     </div>
   )
 };
