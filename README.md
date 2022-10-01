@@ -1,5 +1,7 @@
 # PaaS Price Estimator
 
+Live URL: https://luketurner.org/paas-price-estimator
+
 A little app for comparing pricing/features in various "Containerized PaaS" products.
 
 Pricing data is hardcoded in the app (i.e. not automatically scraped/updated from any official sources) and may be out of date.
