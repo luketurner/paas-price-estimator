@@ -24,7 +24,7 @@ In other words, transient state is fully encapsulated in a subset of the compone
 
 Non-transient state usually needs to be persisted (into the URL fragment in the case of PaaS Price Estimator) and benefits from being stored and managed in a centralized way. I use a design and terminology inspired by `re-frame` framework, where all non-transient state is centralized in a global App DB object. Users of Redux-type frameworks may also recognize similarities.
 
-Important note, this is an *in-memory database* stored your browser only. There is no backend database.
+Important note, this is an *in-memory database* stored in your browser only. There is no backend database.
 
 The App DB is just a SolidJS Store, with a variety of utility functions wrapped around it. Dataflow to/from the DB looks like this:
 
