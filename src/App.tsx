@@ -1,33 +1,9 @@
-import { Component, createSignal, Match, Show, Switch } from 'solid-js';
-import { AboutPage } from './about';
-import { AppDBProvider, useDb } from './db';
-import { ProviderCostBreakdowns, ProviderCostSummaries } from './providers';
-import { ServiceRequestForm } from './ServiceRequestForm';
+import { Component, createSignal, Match, Switch } from 'solid-js';
+import { AboutPage } from './AboutPage';
+import { AppDBProvider } from './db';
+import { MainPage } from './MainPage';
 
-const CostInformation = () => {
-  const [db] = useDb();
-  return (
-    <Show when={db.svc.length > 0}>
-      <h2 class="text-xl m-2 mt-8 text-center">Summary</h2>
-      <p class="text-slate-600">Click providers' names to show/hide them in the cost breakdown below.</p>
-      <ProviderCostSummaries />
-      <h2 class="text-xl m-2 mt-8 text-center">Cost Breakdown</h2>
-      <p class="text-slate-600">Itemized breakdown of the prices summarized above. Quantities are rounded to nearest cent.</p>
-      <ProviderCostBreakdowns />
-    </Show>
-  );
-}
-
-const MainPage: Component = () => {
-  return (
-    <>
-      <ServiceRequestForm />
-      <CostInformation />
-    </>
-  )
-}
-
-const App: Component = () => {
+export const App: Component = () => {
 
   const [page, setPage] = createSignal<'main' | 'about'>('main');
 
@@ -57,5 +33,3 @@ const App: Component = () => {
     </AppDBProvider>
   );
 };
-
-export default App;

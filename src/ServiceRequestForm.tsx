@@ -1,4 +1,4 @@
-import { Component, For, Match, Switch } from "solid-js";
+import { Component, For, Match, ParentComponent, Switch } from "solid-js";
 import { produce } from "solid-js/store";
 import { ServiceRequest, useDb } from "./db";
 
@@ -11,6 +11,48 @@ const Select = (props: any) => {
       </For>
     </select>
   )
+}
+
+interface NumericInputProps {
+  value: number;
+  onChange(v: number): void;
+  width?: string;
+  step?: number;
+  min?: number;
+}
+
+const NumericInput: Component<NumericInputProps> = (props) => {
+  return (
+    <input
+      class={`w-${props.width ?? 12} mx-2 text-black font-semibold border-b-slate-500 border-b`}
+      type="number"
+      value={props.value}
+      step={props.step}
+      min={props.min ?? props.step ?? 1}
+      onChange={(e) => props.onChange(parseInt((e.target as any).value, 10))}
+    />
+  );
+}
+
+interface ButtonProps {
+  onClick(): void;
+}
+
+const AddButton: ParentComponent<AddButtonProps> = (props) => {
+  return (
+    <button
+      class="mx-2 hover:underline text-lime-700"
+      onClick={() => props.onClick()}
+    >
+      {props.children}
+    </button>
+  )
+}
+
+const RemoveButton: Component<ButtonProps> = (props) => {
+  return (
+    <button class="mx-2 text-red-600 float-right" onClick={props.onClick}>[X]</button>
+  );
 }
 
 const ServiceRequestEditor: Component<{
@@ -30,7 +72,7 @@ const ServiceRequestEditor: Component<{
         onChange={(v) => setDb('svc', props.requestIndex, 'type', v)}
       />
       with:
-      <button class="mx-2 text-red-600 float-right" onClick={() => setDb('svc', produce((v) => v.splice(props.requestIndex, 1)))}>[X]</button>
+      <RemoveButton onClick={() => setDb('svc', produce((v) => v.splice(props.requestIndex, 1)))} />
       <ol class="ml-4">
         <li>
         A
@@ -40,21 +82,10 @@ const ServiceRequestEditor: Component<{
           onChange={(v) => setDb('svc', props.requestIndex, 'ct', v)}
         />
         CPU with
-        <input
-          class="w-8 mx-2 text-black font-semibold border-b-slate-500 border-b"
-          // style={{width: '3em'}}
-          type="number"
-          value={props.request.cpu}
-          onChange={(e) => setDb('svc', props.requestIndex, 'cpu', parseInt((e.target as any).value, 10))}
-        />
+        <NumericInput value={props.request.cpu} onChange={v => setDb('svc', props.requestIndex, 'cpu', v)} />
         core{props.request.cpu === 1 ? '' : 's'} and
-        <input
-          class="w-16 mx-2 text-black font-semibold border-b-slate-500 border-b"
-          type="number"
-          value={props.request.mem}
-          step="256"
-          onChange={(e) => setDb('svc', props.requestIndex, 'mem', parseInt((e.target as any).value, 10))}
-        />MB memory.
+        <NumericInput value={props.request.mem} onChange={v => setDb('svc', props.requestIndex, 'mem', v)} width="16" step={256} />
+        MB memory.
         </li>
 
         <For each={props.request.add}>
@@ -63,66 +94,36 @@ const ServiceRequestEditor: Component<{
               <li class="clear-both">
                 <Switch fallback={<li>Unknown addon type: {addon.type}</li>}>
                   <Match when={addon.type === 'ssd'}>
-                    An SSD with 
-                      <input
-                          class="w-16 mx-2 text-black font-semibold border-b-slate-500 border-b"
-                          type="number"
-                          value={addon.size}
-                          step="1"
-                          onChange={(e) => setDb('svc', props.requestIndex, 'add', ix(), 'size', parseInt((e.target as any).value, 10))}
-                        />
-                      GB.
+                    An SSD with
+                    <NumericInput value={addon.size} onChange={v => setDb('svc', props.requestIndex, 'add', ix(), 'size', v)} />
+                    GB.
                   </Match>
                   <Match when={addon.type === 'ipv4'}>
                     A static IPv4 address.
                   </Match>
                   <Match when={addon.type === 'net'}>
                     A network with
-                      <input
-                        class="w-12 mx-2 text-black font-semibold border-b-slate-500 border-b"
-                        type="number"
-                        value={addon.out}
-                        step="1"
-                        onChange={(e) => setDb('svc', props.requestIndex, 'add', ix(), 'out', parseInt((e.target as any).value, 10))}
-                      />
-                      GB/mo egress and
-                      <input
-                        class="w-12 mx-2 text-black font-semibold border-b-slate-500 border-b"
-                        type="number"
-                        value={addon.in}
-                        step="1"
-                        onChange={(e) => setDb('svc', props.requestIndex, 'add', ix(), 'in', parseInt((e.target as any).value, 10))}
-                      />
-                      GB/mo ingress.
+                    <NumericInput value={addon.out} onChange={v => setDb('svc', props.requestIndex, 'add', ix(), 'out', v)} min={0} />
+                    GB/mo egress and
+                    <NumericInput value={addon.in} onChange={v => setDb('svc', props.requestIndex, 'add', ix(), 'in', v)} min={0} />
+                    GB/mo ingress.
                   </Match>
                 </Switch>
-                <button class="mx-2 text-red-600 float-right" onClick={() => setDb('svc', props.requestIndex, 'add', produce((v) => v.splice(ix(), 1)))}>[X]</button>
+                <RemoveButton onClick={() => setDb('svc', props.requestIndex, 'add', produce((v) => v.splice(ix(), 1)))} />
               </li>
             );
           }}
         </For>
         <li class="clear-both">
-          <button class="mx-2 hover:underline text-lime-700"
-            onClick={() => setDb('svc', props.requestIndex, 'add', (v) => [...(v ?? []), {
-              type: 'ipv4',
-          }])}>
+          <AddButton onClick={() => setDb('svc', props.requestIndex, 'add', produce((v) => v.push({ type: 'ipv4', })))}>
             [+IPv4]
-          </button>
-          <button class="mx-2 hover:underline text-lime-700"
-          onClick={() => setDb('svc', props.requestIndex, 'add', (v) => [...(v ?? []), {
-              type: 'net',
-              out: 0,
-              in: 0,
-          }])}>
+          </AddButton>
+          <AddButton onClick={() => setDb('svc', props.requestIndex, 'add', produce((v) => v.push({ type: 'net', out: 0, in: 0, })))}>
             [+Network]
-          </button>
-          <button class="mx-2 hover:underline text-lime-700"
-            onClick={() => setDb('svc', props.requestIndex, 'add', (v) => [...(v ?? []), {
-              type: 'ssd',
-              size: 1
-          }])}>
+          </AddButton>
+          <AddButton onClick={() => setDb('svc', props.requestIndex, 'add', produce((v) => v.push({ type: 'ssd', size: 1 })))}>
             [+SSD]
-          </button>
+          </AddButton>
         </li>
       </ol>
     </li>
@@ -131,16 +132,15 @@ const ServiceRequestEditor: Component<{
 
 const AddServiceRequest = () => {
   const [_, setDb] = useDb();
-  const addService = (s) => setDb('svc', (l) => [...l, s])
   return (
     <div>
-      <button class="mx-2 hover:underline text-lime-700" onClick={() => addService({
+      <AddButton onClick={() => setDb('svc', produce((v) => v.push({
         cpu: 1,
         ct: 'sh',
         type: 'co',
         mem: 256,
         add: []
-      })}>[+Container]</button>
+      })))}>[+Container]</AddButton>
     </div>
   )
 }
