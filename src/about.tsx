@@ -32,7 +32,6 @@ export const AboutPage = () => {
         <li>Shared CPUs and fractional CPUs may be handled inconsistently across providers.</li>
         <li>A variety of other cost calculations could be improved (e.g. tiered network throughput pricing is not yet supported)</li>
         <li>Include more priceable features (certificates, backups, ephemeral storage, etc.)</li>
-        <li>Only subset of the desired providers are supported.</li>
         <li>Only containers are supported. (Want to add managed databases, object storage, etc.)</li>
       </ul>
       <p class="my-2">

@@ -37,9 +37,9 @@ So, what *will* the app support? I'm hoping to build pricing comparisons for the
 - [Railway](https://railway.app/) ([pricing](https://railway.app/pricing))
 - [Heroku](https://www.heroku.com/) ([pricing](https://www.heroku.com/pricing))
 - [Aptible](https://www.aptible.com/) ([pricing](https://www.aptible.com/pricing-plans))
-- [Porter](https://porter.run/) ([pricing](https://porter.run/pricing))
 - [AWS Fargate](https://aws.amazon.com/fargate/) ([pricing](https://aws.amazon.com/fargate/pricing/))
 - [GCP Cloud Run](https://cloud.google.com/run) ([pricing](https://cloud.google.com/run#section-13))
+- [Porter](https://porter.run/) ([pricing](https://porter.run/pricing)) -- **SKIPPED:** No pricing information available
 
 
 ## Development

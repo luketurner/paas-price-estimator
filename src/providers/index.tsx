@@ -8,9 +8,11 @@ import * as aptible from './aptible';
 import * as fargate from './fargate';
 import * as gcp from './gcp';
 import * as heroku from './heroku';
+import * as railway from './railway';
 
 const hoursPerMonth = 24 * 30;
 const secondsPerMonth = 60 * 60 * 24 * 30;
+const minutesPerMonth = 60 * 24 * 30;
 
 export const providers: ProviderTable = {
   fly,
@@ -20,9 +22,10 @@ export const providers: ProviderTable = {
   fargate,
   gcp,
   heroku,
+  railway
 };
 
-export type ProviderID = 'fly' | 'render' | 'do' | 'aptible' | 'fargate' | 'gcp' | 'heroku';
+export type ProviderID = 'fly' | 'render' | 'do' | 'aptible' | 'fargate' | 'gcp' | 'heroku' | 'railway';
 
 export interface Provider {
   prices: PricingTable;
@@ -37,8 +40,9 @@ export interface PricingTier {
   ct: 'sh' | 'de';
   mem: number;
   costPerSecond?: number;
-  costPerMonth?: number;
+  costPerMinute?: number;
   costPerHour?: number;
+  costPerMonth?: number;
 }
 
 export interface StoragePricing {
@@ -87,6 +91,7 @@ export const priceForAddons = (prices: PricingTable, add: ServiceRequestAddon[])
 export const priceForTier = (tier?: PricingTier): number => {
   return tier?.costPerMonth ? tier?.costPerMonth
        : tier?.costPerHour ? tier?.costPerHour * hoursPerMonth
+       : tier?.costPerMinute ? tier?.costPerMinute * minutesPerMonth
        : (tier?.costPerSecond ?? 0) * secondsPerMonth;
 };
 
