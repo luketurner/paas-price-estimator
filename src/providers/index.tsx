@@ -6,6 +6,7 @@ import * as render from './render';
 import * as digitalOcean from './do';
 import * as aptible from './aptible';
 import * as fargate from './fargate';
+import * as gcp from './gcp';
 
 const hoursPerMonth = 24 * 30;
 const secondsPerMonth = 60 * 60 * 24 * 30;
@@ -16,9 +17,10 @@ export const providers: ProviderTable = {
   do: digitalOcean,
   aptible,
   fargate,
+  gcp,
 };
 
-export type ProviderID = 'fly' | 'render' | 'do' | 'aptible' | 'fargate';
+export type ProviderID = 'fly' | 'render' | 'do' | 'aptible' | 'fargate' | 'gcp';
 
 export interface Provider {
   prices: PricingTable;
