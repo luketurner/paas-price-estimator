@@ -55,6 +55,16 @@ npm install
 # run dev server at localhost:3000
 npm run dev
 
-# compile into /docs
+# compile into docs/
 npm run build
+```
+
+Deployment to Github Pages flow:
+
+```bash
+npm run build # build to docs/
+npm run serve # optional -- serves built output for testing
+git add docs
+git commit -m "rebuild"
+git push
 ```
