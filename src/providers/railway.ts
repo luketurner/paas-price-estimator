@@ -43,7 +43,7 @@ function tiers(x): PricingTier[] {
     for (let mem = x.mem[0]; mem <= x.mem[2]; mem += x.mem[1]) {
       if (cpu < 1) {
         // TODO fix this once fractional handling is improved
-        tiers.push(costed({ ...x, cpu: 1, mem, name: `${cpu}-cpu ${mem / 1024}gb` }, cpu));
+        tiers.push(costed({ ...x, cpu: 1, mem, name: `${cpu.toFixed(1)}-cpu ${mem / 1024}gb` }, cpu));
       } else {
         tiers.push(costed({ ...x, cpu, mem, name: `${cpu}-cpu ${mem / 1024}gb` }))
       }
