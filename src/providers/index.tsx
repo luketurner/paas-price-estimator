@@ -1,6 +1,6 @@
 import { Component, createMemo, For, JSX, Show } from 'solid-js';
 import { ServiceRequest, ServiceRequestAddon, useDb } from '../db';
-import { AddonSwitch, Currency } from '../util';
+import { AddonSwitch, Cost } from '../util';
 import * as fly from './fly';
 import * as render from './render';
 import * as digitalOcean from './do';
@@ -14,98 +14,196 @@ const hoursPerMonth = 24 * 30;
 const secondsPerMonth = 60 * 60 * 24 * 30;
 const minutesPerMonth = 60 * 24 * 30;
 
-export const providers: ProviderTable = {
-  fly,
-  render,
-  do: digitalOcean,
-  aptible,
-  fargate,
-  gcp,
-  heroku,
-  railway
-};
-
 export type ProviderID = 'fly' | 'render' | 'do' | 'aptible' | 'fargate' | 'gcp' | 'heroku' | 'railway';
 
 export interface Provider {
+  priceSpec: PricingTableSpec;
   prices: PricingTable;
   name: string;
 }
 
 export type ProviderTable = Record<ProviderID, Provider>;
 
-export interface PricingTier {
+export interface NumberRange {
+  min: number;
+  max: number;
+  step: number;
+}
+
+export interface CostRate {
+  rate: number;
+  period: 'sec' | 'min' | 'hr' | 'mo';
+}
+
+export interface NormedCostRate extends CostRate {
+  period: 'mo';
+}
+
+export interface ContainerPricing {
   name: string;
   cpu: number;
   ct: 'sh' | 'de';
   mem: number;
-  costPerSecond?: number;
-  costPerMinute?: number;
-  costPerHour?: number;
-  costPerMonth?: number;
+  cost: CostRate;
+}
+
+export type PartialContainerPricing = Omit<ContainerPricing, 'name' | 'cost'>
+
+export interface ContainerPricingSpec {
+  name: string | ((v: PartialContainerPricing) => string);
+  cpu: number | NumberRange | number[];
+  ct: 'sh' | 'de';
+  mem: number | NumberRange | number[];
+  cost: CostRate | ((v: PartialContainerPricing) => CostRate);
 }
 
 export interface StoragePricing {
-  gbCostPerMonth: number;
+  persistentSsd: CostRate;
+}
+
+export interface StoragePricingSpec {
+  persistentSsd?: CostRate;
 }
 
 export interface NetworkPricing {
-  gbIn: number;
-  gbOut: number;
+  gbIn: CostRate;
+  gbOut: CostRate;
 }
 
-export interface PricingTable {
+export interface NetworkPricingSpec {
+  gbIn?: CostRate;
+  gbOut?: CostRate;
+}
+
+export interface PricingTableSpec {
   link: string;
-  tiers: PricingTier[];
-  storage: StoragePricing;
-  net: NetworkPricing;
-  staticIpPerMonth?: number;
-  staticIpPerHour?: number;
+  container?: ContainerPricingSpec[];
+  storage?: StoragePricingSpec;
+  net?: NetworkPricingSpec;
+  staticIp?: CostRate;
   lastUpdated: string;
 }
 
-export const tierFor = (prices: PricingTable, req: ServiceRequest) => {
-  return prices.tiers.find(tier => (
-    tier.cpu >= req.cpu &&
-    (req.ct === 'sh' ? true : tier.ct === 'de') &&
-    tier.mem >= req.mem
+export interface PricingTable extends PricingTableSpec {
+  container: ContainerPricing[];
+  storage: StoragePricing;
+  net: NetworkPricing;
+  staticIp: CostRate;
+}
+
+export const emptyCost: NormedCostRate = {
+  rate: 0,
+  period: 'mo',
+}
+
+export const normCost = (v?: CostRate): NormedCostRate => ({
+  rate: v ? {
+    sec: secondsPerMonth,
+    min: minutesPerMonth,
+    hr: hoursPerMonth,
+    mo: 1
+  }[v.period] * v.rate : 0,
+  period: 'mo' 
+});
+
+export const addCosts = (a?: CostRate, b?: CostRate): NormedCostRate => ({
+  rate: normCost(a).rate + normCost(b).rate,
+  period: 'mo'
+})
+
+export const scaleCost = (a: CostRate | undefined, n: number): NormedCostRate => ({
+  rate: normCost(a).rate * n,
+  period: 'mo'
+})
+
+export const numInRange = (v: number, range: NumberRange): boolean => !(
+  (range.min && v < range.min) ||
+  (range.max && v > range.max) ||
+  (range.step && (v % range.step !== 0))
+);
+
+export const rangeFor = (v: NumberRange): number[] => {
+  const a = [];
+  for (let i = v.min || 0; i <= v.max; i += v.step) a.push(i);
+  return a;
+}
+
+// export const isValidTier = (v: Partial<ContainerPricing>): v is ContainerPricing => {
+//   if (!v.cost || !(typeof v.cpu === 'number') || !(typeof v.mem === 'number') || !v.ct || !(typeof v.name === 'string')) return false;
+//   return true;
+// }
+
+
+export const compilePrices = (t: PricingTableSpec): PricingTable => {
+  return {
+    lastUpdated: t.lastUpdated,
+    link: t.link,
+    storage: { persistentSsd: emptyCost, ...t.storage},
+    net: { gbIn: emptyCost, gbOut: emptyCost, ...t.net},
+    staticIp: t.staticIp || emptyCost,
+    container: t.container?.flatMap(v => {
+      const a: ContainerPricing[] = [];
+      for (let c of Array.isArray(v.cpu) ? v.cpu : typeof v.cpu === 'number' ? [v.cpu] : rangeFor(v.cpu)) {
+        for (let m of Array.isArray(v.mem) ? v.mem : typeof v.mem === 'number' ? [v.mem] : rangeFor(v.mem)) {
+          const compiledTier: PartialContainerPricing = { cpu: c, ct: v.ct, mem: m };
+          a.push({
+            ...compiledTier,
+            name: typeof v.name === 'function' ? v.name(compiledTier) : v.name,
+            cost: typeof v.cost === 'function' ? v.cost(compiledTier) : v.cost,
+          });
+        }
+      }
+      return a;
+    }) ?? []
+  };
+};
+
+
+export const matchingContainerTier = (prices: PricingTable, req: ServiceRequest) => {
+  return prices.container.find(tier => (
+    tier.mem >= req.mem &&
+    (req.ct === 'sh' ? (
+      tier.cpu >= req.cpu || (tier.cpu < 1 && req.cpu === 1)
+    ) : (
+      tier.ct === 'de' &&
+      tier.cpu >= req.cpu
+    ))
   ));
 };
 
-export const priceForAddon = (prices: PricingTable, addon: ServiceRequestAddon): number => {
+export const priceForAddon = (prices: PricingTable, addon: ServiceRequestAddon): NormedCostRate => {
   if (addon.type === 'net') {
-    return prices.net.gbOut * addon.out;
+    return scaleCost(prices.net.gbOut, addon.out);
   } else if (addon.type === 'ssd') {
-    return prices.storage.gbCostPerMonth * addon.size;
+    return scaleCost(prices.storage.persistentSsd, addon.size);
   } else if (addon.type === 'ipv4') {
-    return prices.staticIpPerHour ? prices.staticIpPerHour * hoursPerMonth : prices.staticIpPerMonth ?? 0;
+    return normCost(prices.staticIp);
   } else {
-    return 0;
+    return emptyCost;
   }
 };
 
-export const priceForAddons = (prices: PricingTable, add: ServiceRequestAddon[]): number => {
-  return add?.reduce((m, a) => m + priceForAddon(prices, a), 0);
+export const priceForAddons = (prices: PricingTable, add: ServiceRequestAddon[]): NormedCostRate => {
+  return add?.reduce((m, a) => addCosts(m, priceForAddon(prices, a)), emptyCost);
 };
 
-export const priceForTier = (tier?: PricingTier): number => {
-  return tier?.costPerMonth ? tier?.costPerMonth
-       : tier?.costPerHour ? tier?.costPerHour * hoursPerMonth
-       : tier?.costPerMinute ? tier?.costPerMinute * minutesPerMonth
-       : (tier?.costPerSecond ?? 0) * secondsPerMonth;
+export const priceForContainer = (container?: ContainerPricing): NormedCostRate => {
+  return normCost(container?.cost);
 };
 
-export const priceForServiceBase = (prices: PricingTable, svc: ServiceRequest): number => {
-  return priceForTier(tierFor(prices, svc));
+export const priceForServiceBase = (prices: PricingTable, svc: ServiceRequest): NormedCostRate => {
+  return priceForContainer(matchingContainerTier(prices, svc));
 };
 
-export const priceForService = (prices: PricingTable, svc: ServiceRequest): number => {
-  return priceForServiceBase(prices, svc) + priceForAddons(prices, svc.add);
+export const priceForService = (prices: PricingTable, svc: ServiceRequest): NormedCostRate => {
+  return addCosts(priceForServiceBase(prices, svc), priceForAddons(prices, svc.add));
 };
 
-export const priceForServices = (prices: PricingTable, svcs: ServiceRequest[]): number => {
-  return svcs?.reduce((m, s) => m + priceForService(prices, s), 0);
+export const priceForServices = (prices: PricingTable, svcs: ServiceRequest[]): NormedCostRate => {
+  return svcs?.reduce((m, s) => addCosts(m, priceForService(prices, s)), emptyCost);
 };
+
+export const nameForTier = (tier?: ContainerPricing) => tier?.name;
 
 export interface ServicePriceBreakdownProps {
   prices: PricingTable;
@@ -117,20 +215,20 @@ export interface ServicePriceBreakdownProps {
 }
 
 export const ServicePriceBreakdown: Component<ServicePriceBreakdownProps> = (props) => {
-  const tier = createMemo(() => tierFor(props.prices, props.service));
+  const tier = createMemo(() => matchingContainerTier(props.prices, props.service));
   return (
     <>
       <Show when={tier()} fallback={'No matching service offering.'}>
-        <Currency value={priceForService(props.prices, props.service)} unit="mo" /> - {tier()?.name}
+        <Cost value={priceForService(props.prices, props.service)} /> - {nameForTier(tier())}
       </Show>
       <Show when={props.service.add}>
         <ol>
-          <li><Currency value={priceForServiceBase(props.prices, props.service)} unit="mo" /> - Base price</li>
+          <li><Cost value={priceForServiceBase(props.prices, props.service)} /> - Base price</li>
           <For each={props.service.add}>
             {(addon, ix) => {
               return (
                 <li>
-                  <Currency value={priceForAddon(props.prices, addon)} unit="mo" /> - 
+                  <Cost value={priceForAddon(props.prices, addon)} /> - 
                   <AddonSwitch addon={addon} staticIPv4={props.staticIPv4 ?? 'Static IP'} net={props.net ?? 'Network egress traffic'} ssd={props.ssd ?? 'SSD'}/>
                 </li>
               )
@@ -155,7 +253,7 @@ export const ProviderCostSummaries = () => {
             >
               <div class="inline-block align-top w-16">{providers[p].name}</div>
               <div class="list-decimal ml-6 inline-block">
-                <Currency value={priceForServices(providers[p].prices, db.svc)} unit="mo" />
+                <Cost value={priceForServices(providers[p].prices, db.svc)} />
               </div>
             </div>
         );
@@ -188,3 +286,15 @@ export const ProviderCostBreakdowns: Component = () => {
     </For>
   );
 }
+
+
+export const providers: ProviderTable = {
+  fly: {...fly, prices: compilePrices(fly.priceSpec)},
+  do: {...digitalOcean, prices: compilePrices(digitalOcean.priceSpec)},
+  aptible: {...aptible, prices: compilePrices(aptible.priceSpec)},
+  railway: {...railway, prices: compilePrices(railway.priceSpec)},
+  render: {...render, prices: compilePrices(render.priceSpec)},
+  heroku: {...heroku, prices: compilePrices(heroku.priceSpec)},
+  fargate: {...fargate, prices: compilePrices(fargate.priceSpec)},
+  gcp: {...gcp, prices: compilePrices(gcp.priceSpec)},
+};

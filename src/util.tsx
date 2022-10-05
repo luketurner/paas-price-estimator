@@ -1,16 +1,20 @@
 import { Component, createMemo, JSX, Match, Switch } from "solid-js"
 import { ServiceRequestAddon } from "./db";
+import { CostRate, normCost } from "./providers";
 
-export interface CurrencyProps {
-  value?: number;
+export interface CostProps {
+  value?: CostRate;
   precision?: number;
   width?: number;
-  unit?: 'mo';
+  unit?: string;
 }
 
-export const Currency: Component<CurrencyProps> = (p) => (
-  <span class={`text-right w-${p.width ?? 32} inline-block`}>${(p.value ?? 0).toFixed(p.precision ?? 2)}{p.unit ? `/${p.unit}` : ''}</span>
-);
+export const Cost: Component<CostProps> = (p) => {
+  const normedCost = createMemo(() => normCost(p.value))
+  return (
+    <span class={`text-right w-${p.width ?? 32} inline-block`}>${(normedCost().rate).toFixed(p.precision ?? 2)}/{p.unit ?? normedCost().period}</span>
+  )
+};
 
 export interface AddonSwitchProps {
   addon: ServiceRequestAddon;

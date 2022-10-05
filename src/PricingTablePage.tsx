@@ -1,11 +1,9 @@
 import { Component, For } from "solid-js";
-import { priceForTier, PricingTable, Provider, ProviderID, providers } from "./providers";
+import { nameForTier, priceForContainer, Provider, ProviderID, providers } from "./providers";
+import { Cost } from "./util";
 
 export interface PricingTableProps extends Provider {
 }
-
-// TODO keep this DRYer
-const hoursPerMonth = 24 * 30;
 
 export const PricingTableView: Component<PricingTableProps> = (props) => {
   return (
@@ -15,15 +13,15 @@ export const PricingTableView: Component<PricingTableProps> = (props) => {
         (prices last updated: {props.prices.lastUpdated})
       </h2>
       <p class="mb-2"></p>
-      <p>Persistent SSD :: ${props.prices.storage.gbCostPerMonth.toFixed(2)}/GiB-month</p>
-      <p>Network egress :: ${props.prices.net.gbOut.toFixed(2)}/GiB</p>
-      <p>Network ingress :: ${props.prices.net.gbIn.toFixed(2)}/GiB</p>
-      <p>Static IP :: ${(props.prices.staticIpPerHour ? props.prices.staticIpPerHour * hoursPerMonth : props.prices.staticIpPerMonth ?? 0).toFixed(2)}/month</p>
+      <p>Persistent SSD :: <Cost value={props.prices.storage.persistentSsd} unit="GiB-mo"/></p>
+      <p>Network egress :: <Cost value={props.prices.net.gbOut} unit="GiB"/></p>
+      <p>Network ingress :: <Cost value={props.prices.net.gbIn} unit="GiB"/></p>
+      <p>Static IP :: <Cost value={props.prices.staticIp} /></p>
       <p>Tiers ::</p>
-      <For each={props.prices.tiers}>
+      <For each={props.prices.container}>
         {(tier) => (
           <p class="ml-6">
-            {tier.name} :: ${priceForTier(tier).toFixed(2)}/month
+            {nameForTier(tier)} :: <Cost value={priceForContainer(tier)} />
           </p>
         )}
       </For>

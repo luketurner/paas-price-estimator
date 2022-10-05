@@ -1,26 +1,25 @@
-import { PricingTable } from ".";
+import { PricingTableSpec } from ".";
 
 export const name = 'Render';
 
-export const prices: PricingTable = {
+export const priceSpec: PricingTableSpec = {
   link: 'https://render.com/pricing',
   lastUpdated: '2022-09-26',
-  tiers: [
-    { name: 'Starter', cpu: 0.5, ct: 'de', mem: 512, costPerMonth: 7 },
-    { name: 'Starter Plus', cpu: 1,   ct: 'de', mem: 1024, costPerMonth: 15 },
-    { name: 'Standard', cpu: 1,   ct: 'de', mem: 2048, costPerMonth: 25 },
-    { name: 'Standard Plus', cpu: 1.5, ct: 'de', mem: 3072, costPerMonth: 50 },
-    { name: 'Pro', cpu: 2,   ct: 'de', mem: 4096, costPerMonth: 85 },
-    { name: 'Pro Plus', cpu: 4,   ct: 'de', mem: 8192, costPerMonth: 175 },
-    { name: 'Pro Max', cpu: 4,   ct: 'de', mem: 16384, costPerMonth: 225 },
-    { name: 'Pro Ultra', cpu: 8,   ct: 'de', mem: 32768, costPerMonth: 450 },
+  container: [
+    { name: 'Starter', cpu: 0.5, ct: 'de', mem: 512, cost: { rate: 7, period: 'mo' }},
+    { name: 'Starter Plus', cpu: 1,   ct: 'de', mem: 1024, cost: { rate: 15, period: 'mo' }},
+    { name: 'Standard', cpu: 1,   ct: 'de', mem: 2048, cost: { rate: 25, period: 'mo' }},
+    { name: 'Standard Plus', cpu: 1.5, ct: 'de', mem: 3072, cost: { rate: 50, period: 'mo' }},
+    { name: 'Pro', cpu: 2,   ct: 'de', mem: 4096, cost: { rate: 85, period: 'mo' }},
+    { name: 'Pro Plus', cpu: 4,   ct: 'de', mem: 8192, cost: { rate: 175, period: 'mo' }},
+    { name: 'Pro Max', cpu: 4,   ct: 'de', mem: 16384, cost: { rate: 225, period: 'mo' }},
+    { name: 'Pro Ultra', cpu: 8,   ct: 'de', mem: 32768, cost: { rate: 450, period: 'mo' }},
   ],
   storage: {
-    gbCostPerMonth: 0.25
+    persistentSsd: {rate: 0.25, period: 'mo'}
   },
   net: {
-    gbIn: 0,
-    gbOut: 0.10,
+    gbOut: {rate: 0.10, period: 'mo'},
     // gbOutFree: 100 TODO add with free tier handling
   },
 };
