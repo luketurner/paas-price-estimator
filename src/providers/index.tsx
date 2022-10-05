@@ -248,11 +248,11 @@ export const ProviderCostSummaries = () => {
       {(p, ix) => {
         return (
             <div
-              class="my-4 cursor-pointer w-1/2 inline-block"
+              class="ml-32 my-2 cursor-pointer"
               classList={{ 'text-slate-400': db.prv[p] }} onClick={() => setDb('prv', p, v => v ? undefined : true)}
             >
-              <div class="inline-block align-top w-16">{providers[p].name}</div>
-              <div class="list-decimal ml-6 inline-block">
+              <div class="inline-block align-top w-28">{providers[p].name}</div>
+              <div class="list-decimal inline-block">
                 <Cost value={priceForServices(providers[p].prices, db.svc)} />
               </div>
             </div>
