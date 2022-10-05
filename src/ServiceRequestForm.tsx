@@ -16,7 +16,7 @@ const Select = (props: any) => {
 interface NumericInputProps {
   value: number;
   onChange(v: number): void;
-  width?: string;
+  wide?: boolean;
   step?: number;
   min?: number;
 }
@@ -24,7 +24,8 @@ interface NumericInputProps {
 const NumericInput: Component<NumericInputProps> = (props) => {
   return (
     <input
-      class={`w-${props.width ?? 12} mx-2 text-black font-semibold border-b-slate-500 border-b`}
+      class={`mx-2 text-black font-semibold border-b-slate-500 border-b`}
+      classList={{'w-16': props.wide, 'w-12': !props.wide}}
       type="number"
       value={props.value}
       step={props.step}
@@ -84,7 +85,7 @@ const ServiceRequestEditor: Component<{
         CPU with
         <NumericInput value={props.request.cpu} onChange={v => setDb('svc', props.requestIndex, 'cpu', v)} />
         core{props.request.cpu === 1 ? '' : 's'} and
-        <NumericInput value={props.request.mem} onChange={v => setDb('svc', props.requestIndex, 'mem', v)} width="16" step={256} />
+        <NumericInput value={props.request.mem} onChange={v => setDb('svc', props.requestIndex, 'mem', v)} wide={true} step={256} />
         MB memory.
         </li>
 
