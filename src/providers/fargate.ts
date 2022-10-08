@@ -58,21 +58,25 @@ export const priceSpec: PricingTableSpec = {
       cost: (v) => ({ period: 'hr', rate: 0.04048 * v.cpu + 0.004445 * (v.mem / 1024) }),
     },
   ],
-  // NOTE -- net is actually tiered.
-  // 100gb free
-  // 0.09/GB for first 10 TB
-  // 0.085/GB for next 40 TB
-  // 0.07/GB for next 100 TB
-  // 0.05/GB for everything over 150 TB
   net: {
-    gbOut: {rate: 0.09, period: 'mo'}, 
+    gbOut: [
+      // TODO -- this should be PER CUSTOMER, not per service!
+      { size:              100, cost: { rate:     0, period: 'mo' } },
+      { size:  10 * 1024 - 100, cost: { rate:  0.09, period: 'mo' } },
+      { size:  40 * 1024      , cost: { rate: 0.085, period: 'mo' } },
+      { size: 100 * 1024      , cost: { rate:  0.07, period: 'mo' } },
+      { size:         Infinity, cost: { rate:  0.05, period: 'mo' } },
+    ], 
   },
   storage: {
     // Uses price for EBS general purpose SSD (gp2).
     // This was chosen for as close an apples-to-apples comparison with other providers as possible.
     // The billing for gp3 volumes is more complex, as it charges separately for storage, IOPS, and throughput.
-    persistentSsd: {rate: 0.10, period: 'mo'} 
+    persistentSsd: { rate: 0.10, period: 'mo' } 
   },
-  // First static IP per instance is free
-  staticIp: {rate: 0.005, period: 'hr'},
+  staticIp: [
+    // This is PER SERVICE, not per customer! (I think!)
+    { cost: { rate:     0, period: 'hr' }, size: 1 },
+    { cost: { rate: 0.005, period: 'hr' }, size: Infinity },
+  ],
 }

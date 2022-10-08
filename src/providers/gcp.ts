@@ -18,17 +18,12 @@ export const priceSpec: PricingTableSpec = {
     },
   ],
   net: {
-    // NOTE -- network usage is actually tiered:
-    // 0 - 1 TB is $0.12/GiB
-    // 1 - 10 TB is $0.11/GiB
-    // 10+ TB is $0.08/GiB
-
-    // There is also a significantly cheaper "standard tier"?
-    //  0 - 10 TB is $0.085/GiB/mo
-    //  10 - 150 TB is $0.065/GiB/mo
-    //  150 - 500 TB is $0.045/GiB/mo
-    //  Beyond that, "contact sales"
-    gbOut: { rate: 0.12, period: 'mo' },
+    gbOut: [
+      // Is this PER ACCOUNT?
+      { cost: { rate: 0.12, period: 'mo' }, size:     1024, },
+      { cost: { rate: 0.11, period: 'mo' }, size: 9 * 1024, },
+      { cost: { rate: 0.08, period: 'mo' }, size: Infinity, },
+    ],
   },
   // additional charge for storing container image: https://cloud.google.com/artifact-registry/pricing
   // There's also network charges for I/O from storage, I think?

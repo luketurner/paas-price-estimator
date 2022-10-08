@@ -19,7 +19,10 @@ export const priceSpec: PricingTableSpec = {
     persistentSsd: {rate: 0.25, period: 'mo'}
   },
   net: {
-    gbOut: {rate: 0.10, period: 'mo'},
-    // gbOutFree: 100 TODO add with free tier handling
+    gbOut: [
+      // Is this PER ACCOUNT or PER SERVICE or what?
+      { cost: { rate:    0, period: 'mo' }, size: 100      },
+      { cost: { rate: 0.10, period: 'mo' }, size: Infinity },
+    ],
   },
 };

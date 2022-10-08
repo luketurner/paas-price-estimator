@@ -33,5 +33,9 @@ export const priceSpec: PricingTableSpec = {
   net: {
     gbOut: { rate: 0.02, period: 'mo' } // varies based on region -- price for NA region
   },
-  staticIp: { rate: 2, period: 'mo' }, // first one free
+  staticIp: [
+    // This is PER APPLICATION
+    { cost: { rate: 0, period: 'mo' }, size: 1, },
+    { cost: { rate: 2, period: 'mo' }, size: Infinity, },
+  ],
 };
