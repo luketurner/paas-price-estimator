@@ -39,6 +39,12 @@ export interface NormedCostRate extends CostRate {
   period: 'mo';
 }
 
+export type TieredCost = CostTier[]
+export interface CostTier {
+  cost: CostRate;
+  size: number;
+}
+
 export interface ContainerPricing {
   name: string;
   cpu: number;
@@ -58,21 +64,21 @@ export interface ContainerPricingSpec {
 }
 
 export interface StoragePricing {
-  persistentSsd: CostRate;
+  persistentSsd: CostRate | TieredCost;
 }
 
 export interface StoragePricingSpec {
-  persistentSsd?: CostRate;
+  persistentSsd?: CostRate | TieredCost;
 }
 
 export interface NetworkPricing {
-  gbIn: CostRate;
-  gbOut: CostRate;
+  gbIn: CostRate | TieredCost;
+  gbOut: CostRate | TieredCost;
 }
 
 export interface NetworkPricingSpec {
-  gbIn?: CostRate;
-  gbOut?: CostRate;
+  gbIn?: CostRate | TieredCost;
+  gbOut?: CostRate | TieredCost;
 }
 
 export interface PricingTableSpec {
@@ -80,7 +86,7 @@ export interface PricingTableSpec {
   container?: ContainerPricingSpec[];
   storage?: StoragePricingSpec;
   net?: NetworkPricingSpec;
-  staticIp?: CostRate;
+  staticIp?: CostRate | TieredCost;
   lastUpdated: string;
 }
 
@@ -88,7 +94,7 @@ export interface PricingTable extends PricingTableSpec {
   container: ContainerPricing[];
   storage: StoragePricing;
   net: NetworkPricing;
-  staticIp: CostRate;
+  staticIp: CostRate | TieredCost;
 }
 
 export const emptyCost: NormedCostRate = {
@@ -171,13 +177,35 @@ export const matchingContainerTier = (prices: PricingTable, req: ServiceRequest)
   ));
 };
 
+export const isCostRate = (v: any): v is CostRate => {
+  return typeof v.rate === 'number' && ['sec', 'min', 'hr', 'mo'].includes(v.period);
+}
+
+export const resolveCost = (cost: TieredCost | CostRate, v: number): NormedCostRate => {
+  if (isCostRate(cost)) return scaleCost(cost, v);
+  return priceForTieredCost(cost, v);
+}
+
+export const priceForTieredCost = (tiers: TieredCost, v: number): NormedCostRate => {
+  let cost: NormedCostRate = emptyCost;
+  let runningValue = v;
+  for (let tier of tiers) {
+    let used = Math.min(runningValue, tier.size);
+    cost = addCosts(cost, scaleCost(tier.cost, used));
+    runningValue -= used;
+    if (runningValue === 0) break;
+  }
+  if (runningValue !== 0) throw new Error('Incomplete tiered cost');
+  return cost;
+}
+
 export const priceForAddon = (prices: PricingTable, addon: ServiceRequestAddon): NormedCostRate => {
   if (addon.type === 'net') {
-    return scaleCost(prices.net.gbOut, addon.out);
+    return resolveCost(prices.net.gbOut, addon.out);
   } else if (addon.type === 'ssd') {
-    return scaleCost(prices.storage.persistentSsd, addon.size);
+    return resolveCost(prices.storage.persistentSsd, addon.size);
   } else if (addon.type === 'ipv4') {
-    return normCost(prices.staticIp);
+    return resolveCost(prices.staticIp, 1); // TODO -- pickCost doesn't make sense as long as each IP is a separate "addon"
   } else {
     return emptyCost;
   }
