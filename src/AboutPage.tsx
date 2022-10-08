@@ -19,10 +19,8 @@ export const AboutPage = () => {
         The Cost Breakdown section will show an itemized breakdown of where the total price comes from for each provider.
       </p>
       <p class="my-2">
-        Prices are hardcoded and may become outdated as provider prices change.
-      </p>
-      <p>
-        Last pricing update: 2022-09-26
+        Prices are hardcoded and may become outdated as provider prices change. Click the "tables" link under the site header to see pricing data used for
+        each provider and the date that data was most recently collected/updated.
       </p>
       <p class="my-2">
         Be aware, this is a <strong>work in progress</strong>. Notable gaps:
