@@ -18,17 +18,17 @@ export const priceSpec: PricingTableSpec = {
     // Also, the "developer" tier uses shared CPU?
     {
       cpu: { min: 0.1, max: 1, step: 0.1 },
-      ct: 'sh',
-      mem: { min: 1024, max: 8 * 1024, step: 1024 },
-      name: (v) => `${v.cpu.toFixed(1)}-cpu ${v.mem / 1024}gb`,
-      cost: (v) => ({ period: 'min', rate: v.cpu * 0.000463 + (v.mem / 1024) * 0.000231 }),
+      cpuType: 'shared',
+      memory: { min: 1024, max: 8 * 1024, step: 1024 },
+      name: (v) => `${v.cpu.toFixed(1)}-cpu ${v.memory / 1024}gb`,
+      cost: (v) => ({ period: 'min', rate: v.cpu * 0.000463 + (v.memory / 1024) * 0.000231 }),
     },
     {
       cpu: { min: 1, max: 32, step: 1 },
-      ct: 'de',
-      mem: { min: 1024, max: 32 * 1024, step: 1024 },
-      name: (v) => `${v.cpu}-cpu ${v.mem / 1024}gb`,
-      cost: (v) => ({ period: 'min', rate: v.cpu * 0.000463 + (v.mem / 1024) * 0.000231 }),
+      cpuType: 'dedicated',
+      memory: { min: 1024, max: 32 * 1024, step: 1024 },
+      name: (v) => `${v.cpu}-cpu ${v.memory / 1024}gb`,
+      cost: (v) => ({ period: 'min', rate: v.cpu * 0.000463 + (v.memory / 1024) * 0.000231 }),
     },
   ],
   net: {

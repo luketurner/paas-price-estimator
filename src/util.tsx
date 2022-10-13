@@ -1,6 +1,32 @@
-import { Component, createMemo, JSX, Match, Switch } from "solid-js"
-import { ServiceRequestAddon } from "./db";
-import { CostRate, normCost } from "./providers";
+import { Component, createMemo } from "solid-js"
+
+export type Megabyte = number;
+export type Gigabyte = number;
+
+export interface NumberRange {
+  min: number;
+  max: number;
+  step: number;
+}
+
+export interface CostRate {
+  rate: number;
+  period: 'sec' | 'min' | 'hr' | 'mo';
+}
+
+export interface NormedCostRate extends CostRate {
+  period: 'mo';
+}
+
+export type TieredCost = CostTier[]
+export interface CostTier {
+  cost: CostRate;
+  size: number;
+}
+
+export const HOURS_PER_MONTH = 24 * 30;
+export const SECONDS_PER_MONTH = 60 * 60 * 24 * 30;
+export const MINUTES_PER_MONTH = 60 * 24 * 30;
 
 export interface CostProps {
   value?: CostRate;
@@ -16,24 +42,61 @@ export const Cost: Component<CostProps> = (p) => {
   )
 };
 
-export interface AddonSwitchProps {
-  addon: ServiceRequestAddon;
-  staticIPv4: JSX.Element | Component<ServiceRequestAddon>;
-  net: JSX.Element | Component<ServiceRequestAddon>;
-  ssd: JSX.Element | Component<ServiceRequestAddon>;
-  fallback?: JSX.Element | Component<ServiceRequestAddon>;
+export const EMPTY_COST: NormedCostRate = {
+  rate: 0,
+  period: 'mo',
+};
+
+export const normCost = (v?: CostRate): NormedCostRate => ({
+  rate: v ? {
+    sec: SECONDS_PER_MONTH,
+    min: MINUTES_PER_MONTH,
+    hr: HOURS_PER_MONTH,
+    mo: 1
+  }[v.period] * v.rate : 0,
+  period: 'mo' 
+});
+
+export const addCosts = (a?: CostRate, b?: CostRate): NormedCostRate => ({
+  rate: normCost(a).rate + normCost(b).rate,
+  period: 'mo'
+});
+
+export const scaleCost = (a: CostRate | undefined, n: number): NormedCostRate => ({
+  rate: normCost(a).rate * n,
+  period: 'mo'
+});
+
+export const numInRange = (v: number, range: NumberRange): boolean => !(
+  (range.min && v < range.min) ||
+  (range.max && v > range.max) ||
+  (range.step && (v % range.step !== 0))
+);
+
+export const rangeFor = (v: NumberRange): number[] => {
+  const a = [];
+  for (let i = v.min || 0; i <= v.max; i += v.step) a.push(i);
+  return a;
+};
+
+export const isCostRate = (v: any): v is CostRate => {
+  return typeof v.rate === 'number' && ['sec', 'min', 'hr', 'mo'].includes(v.period);
 }
 
-export const AddonSwitch: Component<AddonSwitchProps> = (props) => {
-  const type = createMemo(() => props.addon?.type);
-  const useOrCall = (x: JSX.Element | Component<ServiceRequestAddon>) => typeof x === 'function' ? x(props.addon) : x;
-  return (
-    <Switch
-      fallback={props.fallback ? useOrCall(props.fallback) : `Unknown service addon type: ${type()}`}
-    >
-      <Match when={type() === 'ipv4'}>{useOrCall(props.staticIPv4)}</Match>
-      <Match when={type() === 'net'}>{useOrCall(props.net)}</Match>
-      <Match when={type() === 'ssd'}>{useOrCall(props.ssd)}</Match>
-    </Switch>
-  );
+export const resolveCost = (cost: TieredCost | CostRate, v: number): NormedCostRate => {
+  if (isCostRate(cost)) return scaleCost(cost, v);
+  return priceForTieredCost(cost, v);
+}
+
+export const priceForTieredCost = (tiers: TieredCost, v: number): NormedCostRate => {
+  let cost: NormedCostRate = EMPTY_COST;
+  let runningValue = v;
+  for (let tier of tiers) {
+    let used = Math.min(runningValue, tier.size);
+    cost = addCosts(cost, scaleCost(tier.cost, used));
+    runningValue -= used;
+    if (runningValue === 0) break;
+  }
+  if (runningValue !== 0) throw new Error('Incomplete tiered cost');
+  return cost;
 }

@@ -11,10 +11,10 @@ export const priceSpec: PricingTableSpec = {
   container: [
     { 
       cpu: [1, 2, 4, 6, 8],
-      ct: 'de',
-      mem: [128, 256, 512, 1024, 2 * 1024, 4 * 1024, 8 * 1024, 16 * 1024, 32 * 1024],
-      name: (v) => `${v.cpu}-cpu ${v.mem / 1024}gb`,
-      cost: (v) => ({ period: 'sec', rate: 0.00001800 * v.cpu + 0.00000200 * (v.mem / 1024) }),
+      cpuType: 'dedicated',
+      memory: [128, 256, 512, 1024, 2 * 1024, 4 * 1024, 8 * 1024, 16 * 1024, 32 * 1024],
+      name: (v) => `${v.cpu}-cpu ${v.memory / 1024}gb`,
+      cost: (v) => ({ period: 'sec', rate: 0.00001800 * v.cpu + 0.00000200 * (v.memory / 1024) }),
     },
   ],
   net: {

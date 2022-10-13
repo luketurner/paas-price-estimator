@@ -8,11 +8,11 @@ export const priceSpec: PricingTableSpec = {
   container: [
     // TODO -- confused about this page: https://devcenter.heroku.com/articles/dyno-types.
     // What are the "cpu share" and "compute" columns?
-    { name: 'hobby', cpu: 1, ct: 'sh', mem: 512, cost: { rate: 7, period: 'mo' } },
-    { name: 'standard-1x', cpu: 1, ct: 'sh', mem: 512, cost: { rate: 25, period: 'mo' } },
-    { name: 'standard-2x', cpu: 2, ct: 'sh', mem: 1024, cost: { rate: 50, period: 'mo' } },
-    { name: 'performance-m', cpu: 1, ct: 'de', mem: 2.5 * 1024, cost: { rate: 250, period: 'mo' } },
-    { name: 'performance-l', cpu: 1, ct: 'de', mem: 14 * 1024, cost: { rate: 500, period: 'mo' } },
+    { name: 'hobby', cpu: 1, cpuType: 'shared', memory: 512, cost: { rate: 7, period: 'mo' } },
+    { name: 'standard-1x', cpu: 1, cpuType: 'shared', memory: 512, cost: { rate: 25, period: 'mo' } },
+    { name: 'standard-2x', cpu: 2, cpuType: 'shared', memory: 1024, cost: { rate: 50, period: 'mo' } },
+    { name: 'performance-m', cpu: 1, cpuType: 'dedicated', memory: 2.5 * 1024, cost: { rate: 250, period: 'mo' } },
+    { name: 'performance-l', cpu: 1, cpuType: 'dedicated', memory: 14 * 1024, cost: { rate: 500, period: 'mo' } },
   ],
   net: {
     // ??? Can't find any network pricing?

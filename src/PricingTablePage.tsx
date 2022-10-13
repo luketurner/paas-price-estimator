@@ -1,6 +1,5 @@
 import { Component, For } from "solid-js";
-import { nameForTier, priceForContainer, Provider, ProviderID, providers } from "./providers";
-import { Cost } from "./util";
+import { Provider, ProviderID, providers } from "./providers";
 
 export interface PricingTableProps extends Provider {
 }
@@ -13,18 +12,18 @@ export const PricingTableView: Component<PricingTableProps> = (props) => {
         (prices last updated: {props.prices.lastUpdated})
       </h2>
       <p class="mb-2"></p>
-      <p>Persistent SSD :: <Cost value={props.prices.storage.persistentSsd} unit="GiB-mo"/></p>
+      {/* TODO <p>Persistent SSD :: <Cost value={props.prices.storage.persistentSsd} unit="GiB-mo"/></p>
       <p>Network egress :: <Cost value={props.prices.net.gbOut} unit="GiB"/></p>
       <p>Network ingress :: <Cost value={props.prices.net.gbIn} unit="GiB"/></p>
-      <p>Static IP :: <Cost value={props.prices.staticIp} /></p>
-      <p>Tiers ::</p>
+      <p>Static IP :: <Cost value={props.prices.staticIp} /></p> */}
+      {/* <p>Tiers ::</p>
       <For each={props.prices.container}>
         {(tier) => (
           <p class="ml-6">
             {nameForTier(tier)} :: <Cost value={priceForContainer(tier)} />
           </p>
         )}
-      </For>
+      </For> */}
     </div>
   )
 }
