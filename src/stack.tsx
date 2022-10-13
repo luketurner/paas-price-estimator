@@ -75,6 +75,8 @@ export const fulfillStack = (provider: Provider, desired: DesiredStack): Fulfill
   let containerTotalPrice = EMPTY_COST;
   for (let c of desired.containers) {
     const tier = provider.prices.container.find(tier => (
+      // TODO -- this filter should maybe be replaced with a hash-map kind of thing.
+      (tier.limit === Infinity || fulfilledContainers.filter(v => v.name === tier.name).length < tier.limit) &&
       tier.memory >= c.memory &&
       ((c.cpuType === 'shared') ? (
         tier.cpu >= c.cpu || (tier.cpu < 1 && c.cpu === 1)

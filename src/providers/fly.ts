@@ -6,6 +6,7 @@ export const priceSpec: PricingTableSpec = {
   link: 'https://fly.io/docs/about/pricing/',
   lastUpdated: '2022-09-26',
   container: [
+    { name: 'shared-cpu-1x (256 MB) free tier', cpu: 1, cpuType: 'shared', memory: 256, cost: { rate: 0, period: 'sec' }, limit: 3 },
     { name: 'shared-cpu-1x (256 MB)', cpu: 1, cpuType: 'shared', memory: 256,  cost: { rate: 0.0000008, period: 'sec' }},
     { name: 'shared-cpu-1x (512 MB)', cpu: 1, cpuType: 'shared', memory: 512,  cost: { rate: 0.0000012, period: 'sec' }},
     { name: 'shared-cpu-1x (1 GB)',   cpu: 1, cpuType: 'shared', memory: 1024, cost: { rate: 0.0000022, period: 'sec' }},
@@ -28,10 +29,14 @@ export const priceSpec: PricingTableSpec = {
     { name: 'dedicated-cpu-8x (64 GB)', cpu: 8, cpuType: 'dedicated', memory: 65536, cost: { rate: 0.0002153, period: 'sec' }},
   ],
   storage: {
+    // Note -- 3 GB of storage free tier, total per account.
     persistentSsd: { rate: 0.15, period: 'mo' }
   },
   net: {
-    gbOut: { rate: 0.02, period: 'mo' } // varies based on region -- price for NA region
+    gbOut: [
+      { cost: { rate: 0, period: 'mo' }, size: 160 },
+      { cost: { rate: 0.02, period: 'mo' }, size: Infinity } // varies based on region -- price for NA region
+    ]
   },
   staticIp: [
     // This is PER APPLICATION

@@ -28,6 +28,7 @@ export interface ContainerPricingSpec {
   cpuType: 'shared' | 'dedicated';
   memory: number | NumberRange | number[];
   cost: CostRate | ((v: PartialContainerPricing) => CostRate);
+  limit?: number;
 }
 
 export interface StoragePricingSpec {
@@ -53,9 +54,10 @@ export interface PricingTableSpec {
 export interface ContainerPricing {
   name: string;
   cpu: number;
-  cpuType: 'shared' | 'dedicated'; // TODO ME!
+  cpuType: 'shared' | 'dedicated';
   memory: number;
   cost: CostRate;
+  limit: number;
 }
 
 export type PartialContainerPricing = Omit<ContainerPricing, 'name' | 'cost'>
@@ -89,7 +91,7 @@ export const compilePricingTable = (t: PricingTableSpec): PricingTable => {
       const a: ContainerPricing[] = [];
       for (let c of Array.isArray(v.cpu) ? v.cpu : typeof v.cpu === 'number' ? [v.cpu] : rangeFor(v.cpu)) {
         for (let m of Array.isArray(v.memory) ? v.memory : typeof v.memory === 'number' ? [v.memory] : rangeFor(v.memory)) {
-          const compiledTier: PartialContainerPricing = { cpu: c, cpuType: v.cpuType, memory: m };
+          const compiledTier: PartialContainerPricing = { cpu: c, cpuType: v.cpuType, memory: m, limit: v.limit ?? Infinity };
           a.push({
             ...compiledTier,
             name: typeof v.name === 'function' ? v.name(compiledTier) : v.name,
