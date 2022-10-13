@@ -1,7 +1,25 @@
 import { Component, For } from "solid-js";
 import { Provider, ProviderID, providers } from "./providers";
+import { Cost, CostRate, isCostRate, TieredCost } from "./util";
 
 export interface PricingTableProps extends Provider {
+}
+
+export const CostOrTiered: Component<{
+  value: CostRate | TieredCost;
+  unit?: string;
+}> = (props) => {
+  return (
+    <>
+      {isCostRate(props.value) ? <Cost value={props.value} unit={props.unit} /> :
+        <For each={props.value as TieredCost}>
+          {(t => (
+            <p class="ml-6"><Cost value={t.cost} unit={props.unit}/> :: {t.size}</p>
+          ))}
+        </For>
+      }
+    </>
+  );
 }
 
 export const PricingTableView: Component<PricingTableProps> = (props) => {
@@ -12,18 +30,17 @@ export const PricingTableView: Component<PricingTableProps> = (props) => {
         (prices last updated: {props.prices.lastUpdated})
       </h2>
       <p class="mb-2"></p>
-      {/* TODO <p>Persistent SSD :: <Cost value={props.prices.storage.persistentSsd} unit="GiB-mo"/></p>
-      <p>Network egress :: <Cost value={props.prices.net.gbOut} unit="GiB"/></p>
-      <p>Network ingress :: <Cost value={props.prices.net.gbIn} unit="GiB"/></p>
-      <p>Static IP :: <Cost value={props.prices.staticIp} /></p> */}
-      {/* <p>Tiers ::</p>
+      <p><span class="w-28 inline-block">Persistent SSD</span><CostOrTiered value={props.prices.storage.persistentSsd} unit="GiB-mo"/></p>
+      <p><span class="w-28 inline-block">Network out</span><CostOrTiered value={props.prices.net.gbOut} unit="GiB"/></p>
+      <p><span class="w-28 inline-block">Static IP</span><CostOrTiered value={props.prices.staticIp} /></p>
+      <p><span class="w-28 inline-block">Container tiers</span></p>
       <For each={props.prices.container}>
         {(tier) => (
           <p class="ml-6">
-            {nameForTier(tier)} :: <Cost value={priceForContainer(tier)} />
+            <Cost value={tier.cost} /> :: {tier.name}
           </p>
         )}
-      </For> */}
+      </For>
     </div>
   )
 }
