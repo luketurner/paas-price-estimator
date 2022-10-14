@@ -38,7 +38,7 @@ export interface CostProps {
 export const Cost: Component<CostProps> = (p) => {
   const normedCost = createMemo(() => normCost(p.value))
   return (
-    <><span class={`text-right w-20 inline-block`}>${(normedCost().rate).toFixed(p.precision ?? 2)}</span>/{p.unit ?? normedCost().period}</>
+    <><span class={`text-right w-20 inline-block`}>${(normedCost().rate).toFixed(p.precision ?? 2)}</span>{p.unit === '' ? '' : '/'}{p.unit ?? normedCost().period}</>
   )
 };
 

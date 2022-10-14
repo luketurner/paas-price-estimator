@@ -1,6 +1,6 @@
-import { Component, For } from "solid-js";
+import { Component, For, Show } from "solid-js";
 import { Provider, ProviderID, providers } from "./providers";
-import { Cost, CostRate, isCostRate, TieredCost } from "./util";
+import { Cost, CostRate, isCostRate, isZero, TieredCost } from "./util";
 
 export interface PricingTableProps extends Provider {
 }
@@ -43,11 +43,16 @@ export const PricingTableView: Component<PricingTableProps> = (props) => {
         <a href={props.prices.link} target="_blank" rel="noreferrer" class="text-xl text-indigo-600 underline mr-2">{props.name}</a> 
         (prices last updated: {props.prices.lastUpdated})
       </h2>
-      <p class="mb-2"></p>
-      <p><span class="w-28 inline-block">Persistent SSD</span><CostOrTiered value={props.prices.storage.persistentSsd} unit="GiB-mo"/></p>
-      <p><span class="w-28 inline-block">Network out</span><CostOrTiered value={props.prices.net.gbOut} unit="GiB"/></p>
-      <p><span class="w-28 inline-block">Static IP</span><CostOrTiered value={props.prices.staticIp} unit="IP" /></p>
-      <p><span class="w-28 inline-block">Container tiers</span></p>
+      <Show when={props.prices.freeCredits}>
+        <p><span class="w-32 inline-block">Free credits</span><CostOrTiered value={{rate: props.prices.freeCredits, period: "mo"}} unit=""/></p>
+      </Show>
+      <Show when={!isZero(props.prices.freeCreditsMonthly)}>
+        <p><span class="w-32 inline-block">Free credits</span><CostOrTiered value={props.prices.freeCreditsMonthly} unit="mo"/></p>
+      </Show>
+      <p><span class="w-32 inline-block">Persistent SSD</span><CostOrTiered value={props.prices.storage.persistentSsd} unit="GiB-mo"/></p>
+      <p><span class="w-32 inline-block">Network out</span><CostOrTiered value={props.prices.net.gbOut} unit="GiB"/></p>
+      <p><span class="w-32 inline-block">Static IP</span><CostOrTiered value={props.prices.staticIp} unit="IP" /></p>
+      <p><span class="w-32 inline-block">Container tiers</span></p>
       <For each={props.prices.container}>
         {(tier) => (
           <p class="ml-6">
