@@ -6,7 +6,7 @@ export const priceSpec: PricingTableSpec = {
   link: 'https://fly.io/docs/about/pricing/',
   lastUpdated: '2022-09-26',
   container: [
-    { name: 'shared-cpu-1x (256 MB) free tier', cpu: 1, cpuType: 'shared', memory: 256, cost: { rate: 0, period: 'sec' }, limit: 3 },
+    { name: 'shared-cpu-1x-free', cpu: 1, cpuType: 'shared', memory: 256, cost: { rate: 0, period: 'sec' }, limit: 3 },
     { name: 'shared-cpu-1x (256 MB)', cpu: 1, cpuType: 'shared', memory: 256,  cost: { rate: 0.0000008, period: 'sec' }},
     { name: 'shared-cpu-1x (512 MB)', cpu: 1, cpuType: 'shared', memory: 512,  cost: { rate: 0.0000012, period: 'sec' }},
     { name: 'shared-cpu-1x (1 GB)',   cpu: 1, cpuType: 'shared', memory: 1024, cost: { rate: 0.0000022, period: 'sec' }},

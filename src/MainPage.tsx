@@ -64,9 +64,9 @@ const ProviderBreakdown: Component<{
 }> = (props) => {
   return (
     <div class="my-4">
-      <div class="inline-block align-top w-32">{props.provider.name}</div>
+      <div class="inline-block align-top w-28">{props.provider.name}</div>
       <ol class="inline-block">
-        <li><Cost value={props.fulfilled.network.netOutPrice} /> - Network egress ({props.fulfilled.network.netOut} GiB/mo)</li>
+        <li><Cost value={props.fulfilled.network.netOutPrice} /> - Total network egress ({props.fulfilled.network.netOut} GiB/mo)</li>
         <For each={props.fulfilled.containers.unfulfilled}>
           {(c) => {
             return (
@@ -78,15 +78,17 @@ const ProviderBreakdown: Component<{
           {(c) => {
             return (
               <li>
-                <Cost value={c.totalPrice} /> - {c.name}
+                <Cost value={c.basePrice} /> - {c.name} (cpu: {c.cpu}, mem: {c.memory > 1024 ? `${c.memory / 1024}gb` : `${c.memory}mb`})
                 <Show when={c.addons}>
                   <ol>
-                    <li><Cost value={c.basePrice} /> - Base price</li>
                     <For each={c.addons}>
                       {(addon) => {
                         return (
                           <li>
-                            <Cost value={addon.price} /> - {addon.type === 'ipv4' ? 'Static IPv4 address(es)' : 'SSD'}
+                            <Cost value={addon.price} /> - {addon.type === 'ipv4' ?
+                              `${addon.num} static IPv4 address${addon.num === 1 ? '' : 'es'}` :
+                              `${addon.size} GiB persistent SSD`
+                            }
                           </li>
                         )
                       }}

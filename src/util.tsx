@@ -38,7 +38,7 @@ export interface CostProps {
 export const Cost: Component<CostProps> = (p) => {
   const normedCost = createMemo(() => normCost(p.value))
   return (
-    <span class={`text-right w-${p.width ?? 32} inline-block`}>${(normedCost().rate).toFixed(p.precision ?? 2)}/{p.unit ?? normedCost().period}</span>
+    <><span class={`text-right w-20 inline-block`}>${(normedCost().rate).toFixed(p.precision ?? 2)}</span>/{p.unit ?? normedCost().period}</>
   )
 };
 
@@ -99,4 +99,8 @@ export const priceForTieredCost = (tiers: TieredCost, v: number): NormedCostRate
   }
   if (runningValue !== 0) throw new Error('Incomplete tiered cost');
   return cost;
+}
+
+export const isFree = (cost: CostRate): boolean => {
+  return cost?.rate === 0;
 }
