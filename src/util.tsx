@@ -80,7 +80,7 @@ export const rangeFor = (v: NumberRange): number[] => {
 };
 
 export const isCostRate = (v: any): v is CostRate => {
-  return typeof v.rate === 'number' && ['sec', 'min', 'hr', 'mo'].includes(v.period);
+  return typeof v?.rate === 'number' && ['sec', 'min', 'hr', 'mo'].includes(v.period);
 }
 
 export const resolveCost = (cost: TieredCost | CostRate, v: number): NormedCostRate => {
@@ -101,6 +101,10 @@ export const priceForTieredCost = (tiers: TieredCost, v: number): NormedCostRate
   return cost;
 }
 
-export const isFree = (cost: CostRate): boolean => {
+export const isZero = (cost: CostRate): boolean => {
   return cost?.rate === 0;
+}
+
+export const minCosts = (a: CostRate, b: CostRate) => {
+  return normCost(a).rate < normCost(b).rate ? a : b;
 }

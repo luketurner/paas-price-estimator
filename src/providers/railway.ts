@@ -8,10 +8,10 @@ export const name = 'Railway';
 // In theory should only need that $20 seat IFF:
 //  - we need a container with >8 GB RAM
 //  - we need a container with dedicated vCPU
-// Also has a free tier that needs to be supported ($5 free credit per month)
 export const priceSpec: PricingTableSpec = {
   link: 'https://railway.app/pricing',
   lastUpdated: '2022-10-02',
+  freeCreditsMonthly: { rate: 5, period: 'mo' },
   container: [
     // Note -- Railway seems to support fractional CPU requests as well (0.1, 0.2, etc.)
     // How is the best way to handle those?

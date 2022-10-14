@@ -47,6 +47,8 @@ export interface PricingTableSpec {
   net?: NetworkPricingSpec;
   staticIp?: CostRate | TieredCost;
   lastUpdated: string;
+  freeCredits?: number;
+  freeCreditsMonthly?: CostRate;
 }
 
 // COMPILED PRICING TABLE TYPES
@@ -76,6 +78,8 @@ export interface PricingTable extends PricingTableSpec {
   storage: StoragePricing;
   net: NetworkPricing;
   staticIp: CostRate | TieredCost;
+  freeCredits: number;
+  freeCreditsMonthly: CostRate;
 }
 
 // FUNCTIONS
@@ -87,6 +91,8 @@ export const compilePricingTable = (t: PricingTableSpec): PricingTable => {
     storage: { persistentSsd: EMPTY_COST, ...t.storage},
     net: { gbIn: EMPTY_COST, gbOut: EMPTY_COST, ...t.net},
     staticIp: t.staticIp || EMPTY_COST,
+    freeCredits: t.freeCredits ?? 0,
+    freeCreditsMonthly: t.freeCreditsMonthly ?? EMPTY_COST,
     container: t.container?.flatMap(v => {
       const a: ContainerPricing[] = [];
       for (let c of Array.isArray(v.cpu) ? v.cpu : typeof v.cpu === 'number' ? [v.cpu] : rangeFor(v.cpu)) {

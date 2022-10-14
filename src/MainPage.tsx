@@ -3,7 +3,7 @@ import { useDb } from "./db";
 import { DesiredStackEditor } from "./DesiredStackEditor";
 import { Provider, ProviderID, providers } from "./providers";
 import { FulfilledStack, fulfillStack } from "./stack";
-import { Cost } from "./util";
+import { Cost, isZero } from "./util";
 
 export const MainPage: Component = () => {
   const [db, setDb] = useDb();
@@ -51,7 +51,7 @@ const ProviderSummary: Component<{
     >
       <div class="inline-block align-top w-28">{props.provider.name}</div>
       <div class="list-decimal inline-block">
-        <Cost value={props.fulfilled.totalPrice} />
+        <Cost value={props.fulfilled.adjustedTotalPrice} /> {props.fulfilled.freeMonths && `(${props.fulfilled.freeMonths.toFixed(1)} free months)`}
       </div>
     </div>
   );
@@ -64,9 +64,10 @@ const ProviderBreakdown: Component<{
 }> = (props) => {
   return (
     <div class="my-4">
-      <div class="inline-block align-top w-28">{props.provider.name}</div>
-      <ol class="inline-block">
-        <li><Cost value={props.fulfilled.network.netOutPrice} /> - Total network egress ({props.fulfilled.network.netOut} GiB/mo)</li>
+      <div class="inline-block align-top w-1/5 border-b border-b-slate-400">{props.provider.name}</div>
+      <ol class="inline-block w-4/5">
+        <li class="border-b border-b-slate-400"><Cost value={props.fulfilled.adjustedTotalPrice} /></li>
+        <li><Cost value={props.fulfilled.network.netOutPrice} /> - Network egress ({props.fulfilled.network.netOut} GiB/mo)</li>
         <For each={props.fulfilled.containers.unfulfilled}>
           {(c) => {
             return (
@@ -94,6 +95,9 @@ const ProviderBreakdown: Component<{
                       }}
                     </For>
                   </ol>
+                </Show>
+                <Show when={!isZero(props.fulfilled.freeCreditsUsed)}>
+                  <li>-<Cost value={props.fulfilled.freeCreditsUsed}/> - Monthly free-tier credit</li>
                 </Show>
               </li>
             );

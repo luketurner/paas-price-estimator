@@ -1,6 +1,6 @@
 import { DesiredContainer, DesiredContainerAddon, DesiredContainerAddonSSD, DesiredContainerAddonStaticIPv4, DesiredStack, DesiredStackNetwork } from "./db";
 import { Provider } from "./providers";
-import { resolveCost, addCosts, EMPTY_COST, normCost, CostRate, Gigabyte, Megabyte } from "./util";
+import { resolveCost, addCosts, EMPTY_COST, normCost, CostRate, Gigabyte, Megabyte, scaleCost, minCosts, isCostRate } from "./util";
 
 export interface FulfilledContainerAddonStaticIPv4 {
   type: 'ipv4';
@@ -54,8 +54,11 @@ export interface FulfilledStack {
   desired: DesiredStack;
   provider: Provider;
   totalPrice: CostRate;
+  adjustedTotalPrice: CostRate;
   containers: FulfilledContainers;
   network: FulfilledStackNetwork;
+  freeCreditsUsed: CostRate;
+  freeMonths: number;
 }
 
 export const fulfillStack = (provider: Provider, desired: DesiredStack): FulfilledStack => {
@@ -135,11 +138,17 @@ export const fulfillStack = (provider: Provider, desired: DesiredStack): Fulfill
   }
 
   const totalPrice = addCosts(netTotalPrice, containerTotalPrice);
+  const freeCreditsUsed = minCosts(provider.prices.freeCreditsMonthly, totalPrice);
+  const adjustedTotalPrice = addCosts(totalPrice, scaleCost(freeCreditsUsed, -1));
+  const freeMonths = provider.prices.freeCredits / adjustedTotalPrice.rate;
 
   return {
     desired,
     provider,
     totalPrice,
+    adjustedTotalPrice,
+    freeCreditsUsed,
+    freeMonths,
     containers: {
       desired: desired.containers,
       fulfilled: fulfilledContainers,
