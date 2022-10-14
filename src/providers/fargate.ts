@@ -4,6 +4,7 @@ export const name = 'AWS Fargate';
 
 // 0.04048 per vCPU-hour, 0.004445 per GB-hour
 // based on us-west-1 region
+// Free tier notes: Fargate seems to have no free tier? (ref: https://aws.amazon.com/free/)
 export const priceSpec: PricingTableSpec = {
   link: 'https://aws.amazon.com/fargate/pricing/',
   lastUpdated: '2022-09-30',

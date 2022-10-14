@@ -2,6 +2,7 @@ import { PricingTableSpec } from ".";
 
 export const name = 'Aptible';
 
+// Free tier note: Aptible offers "first $500 of Resources" free. How can we represent that?
 export const priceSpec: PricingTableSpec = {
   link: 'https://www.aptible.com/pricing-plans',
   lastUpdated: '2022-09-30',

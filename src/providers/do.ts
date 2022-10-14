@@ -2,6 +2,7 @@ import { PricingTableSpec } from ".";
 
 export const name = 'DigitalOcean';
 
+// Free tier notes: I don't know what to do with DO's free tier. Sounds like it's limited to "Functions" -- should those count as containers? :shrug:
 export const priceSpec: PricingTableSpec = {
   link: 'https://www.digitalocean.com/pricing/app-platform',
   lastUpdated: '2022-09-29',
