@@ -33,6 +33,7 @@ export interface ShrunkDesiredContainer {
 export interface ShrunkDesiredStack {
   c?: ShrunkDesiredContainer[];
   n?: ShrunkDesiredStackNetwork;
+  f?: boolean;
 }
 
 export interface ShrunkAppDB {
@@ -70,6 +71,7 @@ export interface DesiredContainer {
 export interface DesiredStack {
   containers: DesiredContainer[];
   network: DesiredStackNetwork;
+  useFreeTier: boolean;
 }
 
 
@@ -85,6 +87,7 @@ export type AppDBContextType = [AppDB, SetStoreFunction<AppDB>];
 export const createAppDb = (): AppDBContextType => {
   const [db, setDb] = createStore<AppDB>({
     stack: {
+      useFreeTier: true,
       containers: [],
       network: {
         in: 0,
@@ -138,6 +141,7 @@ export const useDb = () => {
 export const shrinkDb = (db: AppDB): ShrunkAppDB => {
   return {
     ...(db.stack ? { s: {
+      ...(db.stack?.useFreeTier === true ? undefined : { f: false }),
       ...(db.stack?.containers?.length ? { c: db.stack?.containers.map<ShrunkDesiredContainer>((c) => ({
         ...(c.num === 1 ? undefined : { n: c.num }),
         ...(c.cpu === 1 ? undefined : { c: c.cpu }),
@@ -163,6 +167,7 @@ export const shrinkDb = (db: AppDB): ShrunkAppDB => {
 export const inflateDb = (db: ShrunkAppDB): AppDB => {
   return {
     stack: {
+      useFreeTier: db?.s?.f ?? true,
       containers: (db?.s?.c ?? []).map<DesiredContainer>((c) => ({
         num: c.n ?? 1,
         cpu: c.c ?? 1,

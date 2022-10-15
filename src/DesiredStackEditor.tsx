@@ -149,7 +149,11 @@ export const DesiredStackEditor = () => {
         You expect to need
         <NumericInput value={db.stack.network.out} onChange={v => setDb('stack', 'network', 'out', v)} min={0} />
         GB/mo network egress traffic across all containers. (None of the providers charge for incoming traffic.)
-      </p> 
+      </p>
+      <div class="p-4">
+        <input type="checkbox" id="togglefreetier" checked={db.stack.useFreeTier} onChange={e => setDb('stack', 'useFreeTier', Boolean((e.target as any).checked))}/>
+        <label class="select-none ml-1" for="togglefreetier">Include free-tier offerings in the estimation</label>
+      </div>
     </div>
   )
 }

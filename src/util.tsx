@@ -83,15 +83,16 @@ export const isCostRate = (v: any): v is CostRate => {
   return typeof v?.rate === 'number' && ['sec', 'min', 'hr', 'mo'].includes(v.period);
 }
 
-export const resolveCost = (cost: TieredCost | CostRate, v: number): NormedCostRate => {
+export const resolveCost = (cost: TieredCost | CostRate, v: number, useFreeTier: boolean): NormedCostRate => {
   if (isCostRate(cost)) return scaleCost(cost, v);
-  return priceForTieredCost(cost, v);
+  return priceForTieredCost(cost, v, useFreeTier);
 }
 
-export const priceForTieredCost = (tiers: TieredCost, v: number): NormedCostRate => {
+export const priceForTieredCost = (tiers: TieredCost, v: number, useFreeTier: boolean): NormedCostRate => {
   let cost: NormedCostRate = EMPTY_COST;
   let runningValue = v;
   for (let tier of tiers) {
+    if (!useFreeTier && tier.size !== Infinity && tier.cost === EMPTY_COST) continue; // skip free tier
     let used = Math.min(runningValue, tier.size);
     cost = addCosts(cost, scaleCost(tier.cost, used));
     runningValue -= used;

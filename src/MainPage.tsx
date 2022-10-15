@@ -20,7 +20,7 @@ export const MainPage: Component = () => {
   return (
     <>
       <DesiredStackEditor />
-      <h2 class="text-xl m-2 mt-8 text-center">Summary</h2>
+      <h2 class="text-xl m-2 mt-4 text-center">Summary</h2>
       <p class="text-slate-600">Click providers' names to see a detailed cost breakdown below.</p>
       <For each={fulfilled()}>
         {(p) => <ProviderSummary 
@@ -29,7 +29,7 @@ export const MainPage: Component = () => {
           onClick={() => setProvidersToBreakdown(p.providerId, v => v ? undefined : true)}
         />}
       </For>
-      <h2 class="text-xl m-2 mt-8 text-center">Cost Breakdown</h2>
+      <h2 class="text-xl m-2 mt-4 text-center">Cost Breakdown</h2>
       <Show when={Object.keys(providersToBreakdown).length > 0}
         fallback={<p class="text-slate-600 mb-4">Click a provider's name above to see detailed cost breakdowns here!</p>}
       >

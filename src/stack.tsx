@@ -1,6 +1,6 @@
 import { DesiredContainer, DesiredContainerAddon, DesiredContainerAddonSSD, DesiredContainerAddonStaticIPv4, DesiredStack, DesiredStackNetwork } from "./db";
 import { Provider } from "./providers";
-import { resolveCost, addCosts, EMPTY_COST, normCost, CostRate, Gigabyte, Megabyte, scaleCost, minCosts, isCostRate } from "./util";
+import { resolveCost, addCosts, EMPTY_COST, normCost, CostRate, Gigabyte, Megabyte, scaleCost, minCosts, isCostRate, isZero } from "./util";
 
 export interface FulfilledContainerAddonStaticIPv4 {
   type: 'ipv4';
@@ -69,8 +69,8 @@ export const fulfillStack = (provider: Provider, desired: DesiredStack): Fulfill
   const unfulfilledNetIn = 0;
   const unfulfilledNetOut = 0;
 
-  const netInPrice = resolveCost(provider.prices.net.gbIn, netIn ?? 0);
-  const netOutPrice = resolveCost(provider.prices.net.gbOut, netOut ?? 0);
+  const netInPrice = resolveCost(provider.prices.net.gbIn, netIn ?? 0, desired.useFreeTier);
+  const netOutPrice = resolveCost(provider.prices.net.gbOut, netOut ?? 0, desired.useFreeTier);
   const netTotalPrice = addCosts(netInPrice, netOutPrice);
 
   const fulfilledContainers: FulfilledContainer[] = [];
@@ -86,7 +86,8 @@ export const fulfillStack = (provider: Provider, desired: DesiredStack): Fulfill
       ) : (
         tier.cpuType === 'dedicated' &&
         tier.cpu >= c.cpu
-      ))
+      )) &&
+      (desired.useFreeTier ? true : !(tier.limit && isZero(tier.cost))) // free tier check
     ));
     if (tier) {
       const basePrice = normCost(tier.cost);
@@ -95,7 +96,7 @@ export const fulfillStack = (provider: Provider, desired: DesiredStack): Fulfill
       let addonsPrice = EMPTY_COST;
       for (let addon of c.addons) {
         if (addon.type === 'ssd') {
-          const price = resolveCost(provider.prices.storage.persistentSsd, addon.size);
+          const price = resolveCost(provider.prices.storage.persistentSsd, addon.size, desired.useFreeTier);
           addonsPrice = addCosts(addonsPrice, price);
           // TODO -- doesn't handle partial fulfillment
           fulfilledAddons.push({
@@ -105,7 +106,7 @@ export const fulfillStack = (provider: Provider, desired: DesiredStack): Fulfill
             price,
           })
         } else if (addon.type === 'ipv4') {
-          const price = resolveCost(provider.prices.staticIp, addon.num);
+          const price = resolveCost(provider.prices.staticIp, addon.num, desired.useFreeTier);
           addonsPrice = addCosts(addonsPrice, price);
           fulfilledAddons.push({
             type: 'ipv4',
@@ -138,9 +139,9 @@ export const fulfillStack = (provider: Provider, desired: DesiredStack): Fulfill
   }
 
   const totalPrice = addCosts(netTotalPrice, containerTotalPrice);
-  const freeCreditsUsed = minCosts(provider.prices.freeCreditsMonthly, totalPrice);
+  const freeCreditsUsed = desired.useFreeTier ? minCosts(provider.prices.freeCreditsMonthly, totalPrice) : EMPTY_COST;
   const adjustedTotalPrice = addCosts(totalPrice, scaleCost(freeCreditsUsed, -1));
-  const freeMonths = provider.prices.freeCredits / adjustedTotalPrice.rate;
+  const freeMonths = (desired.useFreeTier ? provider.prices.freeCredits : 0) / adjustedTotalPrice.rate;
 
   return {
     desired,
