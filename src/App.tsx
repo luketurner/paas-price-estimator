@@ -28,7 +28,7 @@ export const App: Component = () => {
             <MainPage />
           </Match>
         </Switch>
-        <div class="text-center text-slate-600">
+        <div class="text-center text-slate-600 mt-12">
           Copyright 2022 Luke Turner -- MIT Licensed
         </div>
         <div class="text-center text-slate-600">

@@ -1,4 +1,5 @@
-import { Component, createMemo, For, Show } from "solid-js";
+import { Component, createMemo, createSignal, For, Show } from "solid-js";
+import { createStore } from "solid-js/store";
 import { useDb } from "./db";
 import { DesiredStackEditor } from "./DesiredStackEditor";
 import { Provider, ProviderID, providers } from "./providers";
@@ -15,23 +16,32 @@ export const MainPage: Component = () => {
       fulfilled: fulfillStack(providers[p], db.stack)
     }))
   );
+  const [providersToBreakdown, setProvidersToBreakdown] = createStore<{ [key: string]: true }>({});
   return (
     <>
       <DesiredStackEditor />
       <h2 class="text-xl m-2 mt-8 text-center">Summary</h2>
-      <p class="text-slate-600">Click providers' names to show/hide them in the cost breakdown below.</p>
+      <p class="text-slate-600">Click providers' names to see a detailed cost breakdown below.</p>
       <For each={fulfilled()}>
-        {(p) => <ProviderSummary {...p} faded={db.providers[p.providerId]} onClick={() => setDb('providers', p.providerId, v => v ? undefined : true)} />}
+        {(p) => <ProviderSummary 
+          {...p}
+          faded={Object.keys(providersToBreakdown).length !== 0 && !providersToBreakdown[p.providerId]}
+          onClick={() => setProvidersToBreakdown(p.providerId, v => v ? undefined : true)}
+        />}
       </For>
       <h2 class="text-xl m-2 mt-8 text-center">Cost Breakdown</h2>
-      <p class="text-slate-600">Itemized breakdown of the prices summarized above. Quantities are rounded to nearest cent.</p>
-      <For each={fulfilled()}>
-        {(p) => 
-          <Show when={!db.providers[p.providerId]}>
-            <ProviderBreakdown {...p} />
-          </Show>
-        }
-      </For>
+      <Show when={Object.keys(providersToBreakdown).length > 0}
+        fallback={<p class="text-slate-600 mb-4">Click a provider's name above to see detailed cost breakdowns here!</p>}
+      >
+        <p class="text-slate-600">Itemized breakdown of the prices summarized above. Quantities are rounded to nearest cent.</p>
+        <For each={fulfilled()}>
+          {(p) => 
+            <Show when={providersToBreakdown[p.providerId]}>
+              <ProviderBreakdown {...p} />
+            </Show>
+          }
+        </For>
+      </Show>
     </>
   );
 };

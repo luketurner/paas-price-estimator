@@ -37,7 +37,6 @@ export interface ShrunkDesiredStack {
 
 export interface ShrunkAppDB {
   s?: ShrunkDesiredStack;
-  p?: { [key: string]: true };
 }
 
 // LONG FORM (FOR INTERNAL REPRESENTATION)
@@ -76,7 +75,6 @@ export interface DesiredStack {
 
 export interface AppDB {
   stack: DesiredStack;
-  providers: { [key: string]: true };
 }
 
 export type AppDBContextType = [AppDB, SetStoreFunction<AppDB>];
@@ -86,7 +84,6 @@ export type AppDBContextType = [AppDB, SetStoreFunction<AppDB>];
  */
 export const createAppDb = (): AppDBContextType => {
   const [db, setDb] = createStore<AppDB>({
-    providers: {},
     stack: {
       containers: [],
       network: {
@@ -140,7 +137,6 @@ export const useDb = () => {
 
 export const shrinkDb = (db: AppDB): ShrunkAppDB => {
   return {
-    ...(Object.keys(db.providers).length === 0 ? undefined : { p: db.providers }),
     ...(db.stack ? { s: {
       ...(db.stack?.containers?.length ? { c: db.stack?.containers.map<ShrunkDesiredContainer>((c) => ({
         ...(c.num === 1 ? undefined : { n: c.num }),
@@ -166,7 +162,6 @@ export const shrinkDb = (db: AppDB): ShrunkAppDB => {
 
 export const inflateDb = (db: ShrunkAppDB): AppDB => {
   return {
-    providers: db.p || {},
     stack: {
       containers: (db?.s?.c ?? []).map<DesiredContainer>((c) => ({
         num: c.n ?? 1,
