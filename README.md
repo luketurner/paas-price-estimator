@@ -55,16 +55,39 @@ npm install
 # run dev server at localhost:3000
 npm run dev
 
-# compile into docs/
+# compile into dist/client
 npm run build
+
+# preview dist/client
+npm run serve
+
+# compile into docs/ for Github Pages
+npm run build-gh
 ```
 
 Deployment to Github Pages flow:
 
 ```bash
-npm run build # build to docs/
-npm run serve # optional -- serves built output for testing
+npm run build-gh # build to docs/
+npm run serve # optional -- serves dist/client/ locally for testing
 git add docs
 git commit -m "rebuild"
 git push
 ```
+
+> **Windows Note**: The `npm run build-gh` command uses `cp` and `rm`. Windows users will need to use a tool like MinGW, WSL, Cygwin, etc. to run it.
+## Static Site Generation (SSG)
+
+PaaS Price Estimator uses `vite-plugin-ssr` to render static HTML at build-time and rehydrate it on the client (a.k.a. SSG mode, enabled by setting `prerender: true` in the plugin config). This allows the `tables` and `about` pages to be fully functional even in non-JavaScript-enabled clients. (The `main` page, with the actual estimator, still won't function without JavaScript enabled.)
+
+Note, although we're using `vite-plugin-ssr`, there is no actual "server-side rendering" in this case, since the rendering occurs at build-time. The app is distributed as a directory of static HTML, CSS, and JS files that can be served by any static file host (e.g. Github Pages.)
+
+Some notes on the SSR implementation:
+
+- Each page in the `src/pages/` directory is rendered into a static HTML file.
+- The process and layouts used for rendering on client-side and "server-side" (i.e. build-time) are in the `src/renderer` directory.
+- The main shared Layout used by all pages is in `src/Layout.tsx`
+
+### SSR Todo
+
+- [ ] Page isn't fully interactive until hydrated. Would like some kind of "Loading" indicator.

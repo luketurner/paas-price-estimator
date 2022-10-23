@@ -103,6 +103,10 @@ export const AboutPage = () => {
         URLs are "shareable" -- copy/paste the URL to share with your friends, or bookmark to remember your desired stack.
       </P>
       <P>
+        The actual estimator relies on JavaScript to function. The rest of the app, namely the <code>tables</code> and <code>about</code> pages,
+        work fine in clients without JavaScript.
+      </P>
+      <P>
         PaaS Price Estimator is open source and MIT Licensed.
         For more details on how it works, visit the 
         <a class="text-indigo-600 underline" href="https://github.com/luketurner/paas-price-estimator">Github page</a>.

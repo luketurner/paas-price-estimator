@@ -1,4 +1,4 @@
-import { Component, createMemo, createSignal, For, Show } from "solid-js";
+import { Component, createMemo, For, Show } from "solid-js";
 import { createStore } from "solid-js/store";
 import { useDb } from "./db";
 import { DesiredStackEditor } from "./DesiredStackEditor";
@@ -61,7 +61,7 @@ const ProviderSummary: Component<{
     >
       <div class="inline-block align-top w-28">{props.provider.name}</div>
       <div class="list-decimal inline-block">
-        <Cost value={props.fulfilled.adjustedTotalPrice} /> {props.fulfilled.freeMonths && props.fulfilled.freeMonths !== Infinity && `(${props.fulfilled.freeMonths.toFixed(1)} free months)`}
+        <Cost value={props.fulfilled.adjustedTotalPrice} /> {props.fulfilled.freeMonths > 0 && props.fulfilled.freeMonths !== Infinity && `(${props.fulfilled.freeMonths.toFixed(1)} free months)`}
       </div>
     </div>
   );

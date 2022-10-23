@@ -1,0 +1,7 @@
+{
+  "version": "0.4.43",
+  "usesClientRouter": true,
+  "baseUrl": "/paas-price-estimator/",
+  "baseAssets": null,
+  "includeAssetsImportedByServer": false
+}

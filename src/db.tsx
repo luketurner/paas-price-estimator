@@ -1,5 +1,6 @@
-import { createContext, createEffect, createMemo, onCleanup, ParentComponent, useContext } from "solid-js";
+import { Accessor, createContext, createEffect, createMemo, onCleanup, ParentComponent, useContext } from "solid-js";
 import { createStore, SetStoreFunction } from "solid-js/store";
+import { isServer } from "solid-js/web";
 import { Gigabyte, Megabyte } from "./util";
 
 
@@ -79,7 +80,7 @@ export interface AppDB {
   stack: DesiredStack;
 }
 
-export type AppDBContextType = [AppDB, SetStoreFunction<AppDB>];
+export type AppDBContextType = [AppDB, SetStoreFunction<AppDB>, Accessor<string>];
 
 /**
  * Creates a new AppDB store. Returns a tuple [db, setDb], just like createStore().
@@ -96,30 +97,33 @@ export const createAppDb = (): AppDBContextType => {
     }
   });
 
-  // set up hash -> AppDB databinding
-  const updateFromHash = () => {
-    const currentHash = window.location.hash;
-    try {
-      if (currentHash.length > 1) {
-        // console.debug('Reading hash:', inflateDb(JSON.parse(atob(currentHash.slice(1)))));
-        setDb(inflateDb(JSON.parse(atob(currentHash.slice(1)))));
-      }
-    } catch (e) {
-      console.error('unable to read hash', currentHash, e);
-    }
-  };
-  window.addEventListener('hashchange', updateFromHash);
-  onCleanup(() => window.removeEventListener('hashchange', updateFromHash));
-  updateFromHash();
-
-  // set up AppDB -> hash databinding
   const stringDb = createMemo(() => JSON.stringify(shrinkDb(db)));
-  createEffect(() => {
-    // console.debug("Writing hash:", stringDb());
-    window.location.hash = btoa(stringDb());
-  });
 
-  return [db, setDb];
+  if (!isServer) {
+    // set up hash -> AppDB databinding
+    const updateFromHash = () => {
+      const currentHash = window.location.hash;
+      try {
+        if (currentHash.length > 1) {
+          // console.debug('Reading hash:', inflateDb(JSON.parse(atob(currentHash.slice(1)))));
+          setDb(inflateDb(JSON.parse(atob(currentHash.slice(1)))));
+        }
+      } catch (e) {
+        console.error('unable to read hash', currentHash, e);
+      }
+    };
+    window.addEventListener('hashchange', updateFromHash);
+    onCleanup(() => window.removeEventListener('hashchange', updateFromHash));
+    updateFromHash();
+
+    // set up AppDB -> hash databinding
+    createEffect(() => {
+      // console.debug("Writing hash:", stringDb());
+      window.location.hash = btoa(stringDb());
+    });
+  }
+
+  return [db, setDb, stringDb];
 }
 
 export const AppDBContext = createContext<AppDBContextType>();
