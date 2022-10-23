@@ -9,7 +9,7 @@ Pricing data is hardcoded in the app (i.e. not automatically scraped/updated fro
 Mainly written as an experiment with some new front-end tools I wanted to try:
 
 - [SolidJS](https://solidjs.com)
-- [Vite](https://vitejs.dev/)
+- [Vite](https://vitejs.dev/) with [vite-plugin-ssr](https://vite-plugin-ssr.com/)
 - [TailwindCSS](https://tailwindcss.com/)
 
 The latest built copy of the site is in the `docs/` directory. This directory name is used for Github Pages interop -- the contents aren't docs, but the actual compiled site.
