@@ -1,4 +1,4 @@
-import { Component, createMemo } from "solid-js"
+import { Component, createMemo, ParentComponent } from "solid-js"
 
 export type Megabyte = number;
 export type Gigabyte = number;
@@ -108,4 +108,31 @@ export const isZero = (cost: CostRate): boolean => {
 
 export const minCosts = (a: CostRate, b: CostRate) => {
   return normCost(a).rate < normCost(b).rate ? a : b;
+}
+
+export const P: ParentComponent = (p) => <p class="my-2">{p.children}</p>
+
+export const TocLink: ParentComponent<{
+  id: string;
+}> = (props) => {
+  return <button class="underline text-indigo-600" onClick={() => scrollTo(props.id)}>{props.children}</button>;
+}
+
+export const RevTocLink: Component = () => {
+  return <TocLink id="toc">(back to top)</TocLink>;
+}
+
+export const Heading: ParentComponent<{
+  id: string
+}> = (props) => {
+  return (
+    <h2 id={props.id}><span class="text-xl pr-2 text-black">{props.children}</span>{props.id !== 'toc' && <RevTocLink />}</h2>
+  );
+}
+
+// adapted from https://developer.mozilla.org/en-US/docs/Web/API/Window/location#example_6_using_bookmarks_without_changing_the_hash_property
+export const scrollTo = (id: string) => {
+  const node = document.getElementById(id);
+  if (!node) return;
+  document.documentElement.scrollTop = node.offsetTop;
 }

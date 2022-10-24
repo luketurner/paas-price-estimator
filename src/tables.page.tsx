@@ -1,9 +1,21 @@
 import { Component, For, Show } from "solid-js";
-import { Provider, ProviderID, providers } from "./providers";
-import { Cost, CostRate, isCostRate, isZero, TieredCost } from "./util";
+import { providers, ProviderID, Provider } from "./providers";
+import { TieredCost, Cost, CostRate, isCostRate, isZero, P } from "./util";
+import { PageLayout } from "./renderer/PageLayout";
 
-export interface PricingTableProps extends Provider {
-}
+export const Page = () => (
+  <PageLayout page="tables">
+      <div class="text-slate-700">
+        <P>
+          This page lists the pricing tables that PaaS Price Estimator uses when calculating estimates. 
+          Click the providers' names to open their pricing pages in a new tab.
+        </P>
+      </div>
+      <For each={Object.keys(providers) as ProviderID[]}>
+        {(id) => <PricingTableView {...providers[id]} />}
+      </For>
+  </PageLayout>
+);
 
 export const TieredCostTable: Component<{
   value: TieredCost;
@@ -36,10 +48,10 @@ export const CostOrTiered: Component<{
   );
 }
 
-export const PricingTableView: Component<PricingTableProps> = (props) => {
+export const PricingTableView: Component<Provider> = (props) => {
   return (
     <div class="my-6">
-      <h2 class="text-slate-600">
+      <h2 class="text-slate-700">
         <a href={props.prices.link} target="_blank" rel="noreferrer" class="text-xl text-indigo-600 underline mr-2">{props.name}</a> 
         (prices last updated: {props.prices.lastUpdated})
       </h2>
@@ -63,17 +75,3 @@ export const PricingTableView: Component<PricingTableProps> = (props) => {
     </div>
   )
 }
-
-export const PricingTablePage: Component = () => {
-  return (
-    <>
-      <p class="text-slate-600">
-        This page lists the pricing tables that PaaS Price Estimator uses when calculating estimates. 
-        Click the providers' names to open their pricing pages in a new tab.
-      </p>
-      <For each={Object.keys(providers) as ProviderID[]}>
-        {(id) => <PricingTableView {...providers[id]} />}
-      </For>
-    </>
-  );
-};

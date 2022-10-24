@@ -2,10 +2,10 @@
 
 import { createSignal } from 'solid-js';
 import { hydrate } from 'solid-js/web';
-import { PageLayout } from './PageLayout';
+import { PageLayoutWrapper } from './PageLayout';
 import type { Route } from './PageLayout';
 import type { PageContextBuiltInClient } from 'vite-plugin-ssr/client/router';
-import type { PageContext } from './types';
+import type { PageContext } from './pageContext';
 
 export const clientRouting = true;
 
@@ -26,7 +26,7 @@ export const render = (pageContext: PageContextBuiltInClient & PageContext) => {
     // Render the page.
     // This is the first page rendering; the page has been rendered to HTML
     // and we now make it interactive.
-    hydrate(() => <PageLayout route={() => route()} />, content!);
+    hydrate(() => <PageLayoutWrapper route={() => route()} />, content!);
     layoutReady = true;
   }
 };

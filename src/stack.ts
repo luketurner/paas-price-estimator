@@ -61,6 +61,12 @@ export interface FulfilledStack {
   freeMonths: number;
 }
 
+/**
+ * Given a Provider and a DesiredStack, makes a best-effort attempt to "fulfill" the desired stack
+ * using the provider's pricing table. Returns a FulfilledStack object that indicates which
+ * service(s) of the Provider are used to fulfill the desired stack, which parts of the stack couldn't
+ * be fulfilled, aggregate pricing information, etc.
+ */
 export const fulfillStack = (provider: Provider, desired: DesiredStack): FulfilledStack => {
 
   // TODO unfulfilled network not currently supported
