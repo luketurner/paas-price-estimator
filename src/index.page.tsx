@@ -190,7 +190,7 @@ const DesiredContainerEditor: Component<{
         <Select
           options={['shared', 'dedicated']}
           selected={props.container.cpuType}
-          onChange={(v) => setDb('stack', 'containers', props.index, 'cpuType', v)}
+          onChange={(v) => setDb('stack', 'containers', props.index, 'cpuType', v as any)}
         />
         CPU with
         <NumericInput value={props.container.cpu} onChange={v => setDb('stack', 'containers', props.index, 'cpu', v)} />
