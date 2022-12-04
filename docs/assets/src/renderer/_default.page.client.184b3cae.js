@@ -1,0 +1,1 @@
+import{l as r,n as s,c,o as u}from"../../chunk-5b6e2b84.js";const i=!0;let e=!1;const[l,p]=r(null),d=t=>{const o=document.getElementById("page-view"),{Page:a,pageProps:n}=t;p({Page:a,pageProps:n}),e||(s(()=>c(u,{route:()=>l()}),o),e=!0)};export{i as clientRouting,d as render};
