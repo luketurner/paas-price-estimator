@@ -119,7 +119,7 @@ export const createAppDb = (): AppDBContextType => {
     // set up AppDB -> hash databinding
     createEffect(() => {
       // console.debug("Writing hash:", stringDb());
-      window.location.hash = btoa(stringDb());
+      window.history.replaceState(null, "", "#" + btoa(stringDb()));
     });
   }
 
