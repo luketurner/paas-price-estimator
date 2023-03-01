@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "serve": "vite preview",
-    "build-gh": "vite build && rm -r docs/* && touch docs/.nojekyll && cp -r dist/client/* docs/"
+    "build-gh": "vite build && rm -rf docs/* && touch docs/.nojekyll && cp -r dist/client/* docs/"
   },
   "author": "Luke Turner",
   "license": "MIT",
